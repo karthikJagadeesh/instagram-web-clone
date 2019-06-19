@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
 
+import ThemeProvider from '../components/utils/theme';
+
 import AccountRoutes from './Accounts';
 
 class ErrorBoundary extends Component {
@@ -39,12 +41,14 @@ class ErrorBoundary extends Component {
 function Layout() {
   return (
     <ErrorBoundary>
-      <Router>
-        <Switch>
-          <Route path="/accounts" component={AccountRoutes} />
-          <Route component={AccountRoutes} />
-        </Switch>
-      </Router>
+      <ThemeProvider>
+        <Router>
+          <Switch>
+            <Route path="/accounts" component={AccountRoutes} />
+            <Route component={AccountRoutes} />
+          </Switch>
+        </Router>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

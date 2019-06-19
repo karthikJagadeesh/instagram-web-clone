@@ -1,5 +1,7 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { render } from 'react-dom';
+
 import Layout from './components/Layout';
 
-ReactDOM.render(<Layout />, document.getElementById('root'));
+const root = document.querySelector('#root');
+render(<Layout />, root);
