@@ -25,9 +25,6 @@ const useSignUpStyles = makeStyles({
     gridTemplateColumns: '2fr 1fr'
   },
 
-  typography: {
-    justifySelf: 'end'
-  },
   signUpButton: {
     justifySelf: 'start'
   }
@@ -38,7 +35,7 @@ function SignUp() {
 
   return (
     <Card className={classes.card}>
-      <Typography variant="body2" className={classes.typography}>
+      <Typography align="right" variant="body2">
         {"Don't have an account?"}
       </Typography>
       <Link to="/signup">
@@ -52,9 +49,11 @@ function SignUp() {
 
 function ForgotPassword() {
   return (
-    <Button fullWidth color="secondary">
-      <Typography variant="caption">Forgot password?</Typography>
-    </Button>
+    <Link to="/password">
+      <Button fullWidth color="secondary">
+        <Typography variant="caption">Forgot password?</Typography>
+      </Button>
+    </Link>
   );
 }
 

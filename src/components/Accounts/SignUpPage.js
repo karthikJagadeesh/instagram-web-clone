@@ -25,9 +25,6 @@ const loginStyles = {
     gridTemplateColumns: '3fr 2fr'
   },
 
-  typography: {
-    justifySelf: 'end'
-  },
   signUpButton: {
     justifySelf: 'start'
   }
@@ -36,7 +33,7 @@ const loginStyles = {
 function _Login({ classes }) {
   return (
     <Card className={classes.card}>
-      <Typography variant="body2" className={classes.typography}>
+      <Typography align="right" variant="body2">
         Have an account?
       </Typography>
       <Link to="/login">
