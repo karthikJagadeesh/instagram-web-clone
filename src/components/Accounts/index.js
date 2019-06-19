@@ -2,7 +2,7 @@ import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
 import LoginPage from './LoginPage';
-import SignUpPage from './LoginPage';
+import SignUpPage from './SignUpPage';
 
 function AccountRoutes() {
   return (

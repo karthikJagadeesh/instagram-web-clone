@@ -7,7 +7,7 @@ import CardHeader from '@material-ui/core/CardHeader';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 
 import { OR, LoginWithFacebook } from './utils';
 
@@ -17,12 +17,12 @@ const card = {
   marginBottom: 10
 };
 
-const useSignUpStyles = makeStyles({
+const loginStyles = {
   card: {
     ...card,
     display: 'grid',
     alignItems: 'center',
-    gridTemplateColumns: '2fr 1fr'
+    gridTemplateColumns: '3fr 2fr'
   },
 
   typography: {
@@ -31,34 +31,26 @@ const useSignUpStyles = makeStyles({
   signUpButton: {
     justifySelf: 'start'
   }
-});
+};
 
-function SignUp() {
-  const classes = useSignUpStyles();
-
+function _Login({ classes }) {
   return (
     <Card className={classes.card}>
       <Typography variant="body2" className={classes.typography}>
-        {"Don't have an account?"}
+        Have an account?
       </Typography>
-      <Link to="/signup">
+      <Link to="/login">
         <Button color="primary" className={classes.signUpButton}>
-          Sign up
+          Log in
         </Button>
       </Link>
     </Card>
   );
 }
 
-function ForgotPassword() {
-  return (
-    <Button fullWidth color="secondary">
-      <Typography variant="caption">Forgot password?</Typography>
-    </Button>
-  );
-}
+const Login = withStyles(loginStyles)(_Login);
 
-const useLoginPageStyles = makeStyles({
+const signUpPageStyles = {
   card,
 
   section: {
@@ -73,6 +65,10 @@ const useLoginPageStyles = makeStyles({
     fontSize: 56,
     letterSpacing: 1
   },
+  cardHeaderSubHeader: {
+    textAlign: 'center',
+    fontWeight: 600
+  },
 
   textField: {
     marginBottom: 6
@@ -81,29 +77,39 @@ const useLoginPageStyles = makeStyles({
   button: {
     margin: '8px 0px'
   }
-});
+};
 
-function LoginPage() {
-  const classes = useLoginPageStyles();
-
+function _SignUpPage({ classes }) {
   const cardHeaderProps = {
     title: 'Instaclone',
+    subheader: 'Sign up to see photos from your friends.',
     classes: {
-      title: classes.cardHeaderTitle
+      title: classes.cardHeaderTitle,
+      subheader: classes.cardHeaderSubHeader
     }
   };
-  const nameProps = {
-    fullWidth: true,
+
+  const textFieldProps = {
     variant: 'filled',
-    label: 'Username',
+    fullWidth: true,
     className: classes.textField
   };
+  const emailProps = {
+    ...textFieldProps,
+    label: 'Email'
+  };
+  const fullNameProps = {
+    ...textFieldProps,
+    label: 'Full Name'
+  };
+  const userNameProps = {
+    ...textFieldProps,
+    label: 'Username'
+  };
   const passwordProps = {
-    fullWidth: true,
-    variant: 'filled',
+    ...textFieldProps,
     label: 'Password',
-    type: 'password',
-    className: classes.textField
+    type: 'password'
   };
   const buttonProps = {
     variant: 'contained',
@@ -117,17 +123,24 @@ function LoginPage() {
       <article>
         <Card className={classes.card}>
           <CardHeader {...cardHeaderProps} />
-          <TextField {...nameProps} />
-          <TextField {...passwordProps} />
-          <Button {...buttonProps}>Log In</Button>
+          <LoginWithFacebook
+            variant="contained"
+            color="primary"
+            iconColor="white"
+          />
           <OR />
-          <LoginWithFacebook color="secondary" iconColor="blue" />
-          <ForgotPassword />
+          <TextField {...emailProps} />
+          <TextField {...fullNameProps} />
+          <TextField {...userNameProps} />
+          <TextField {...passwordProps} />
+          <Button {...buttonProps}>Sign Up</Button>
         </Card>
-        <SignUp />
+        <Login />
       </article>
     </section>
   );
 }
 
-export default LoginPage;
+const SignUpPage = withStyles(signUpPageStyles)(_SignUpPage);
+
+export default SignUpPage;

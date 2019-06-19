@@ -43,6 +43,13 @@ const theme = createMuiTheme({
       contained: {
         boxShadow: 'unset'
       }
+    },
+
+    MuiCard: {
+      root: {
+        boxShadow: 'none',
+        border: '1px solid #e6e6e6'
+      }
     }
   }
 });
