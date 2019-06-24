@@ -47,6 +47,10 @@ const useStyles = makeStyles({
     backgroundRepeat: 'no-repeat',
     height: 96,
     width: 96
+  },
+
+  button: {
+    background: '#fafafa'
   }
 });
 
@@ -97,7 +101,9 @@ function ResetPage() {
           </CardContent>
           <Divider className={classes.divider} />
           <Link to="/login">
-            <Button fullWidth>Back To Login</Button>
+            <Button fullWidth className={classes.button}>
+              Back To Login
+            </Button>
           </Link>
         </Card>
       </article>

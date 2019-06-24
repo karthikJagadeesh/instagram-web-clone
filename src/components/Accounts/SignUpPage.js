@@ -1,5 +1,7 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { useForm, useField } from 'react-final-form-hooks';
 
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
@@ -8,6 +10,8 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 
 import { withStyles } from '@material-ui/core/styles';
+
+import { signUpAction } from '../../redux/actions/user';
 
 import { OR, LoginWithFacebook } from './utils';
 
@@ -77,14 +81,20 @@ const signUpPageStyles = {
 };
 
 function _SignUpPage({ classes }) {
-  const cardHeaderProps = {
-    title: 'Instaclone',
-    subheader: 'Sign up to see photos from your friends.',
-    classes: {
-      title: classes.cardHeaderTitle,
-      subheader: classes.cardHeaderSubHeader
-    }
-  };
+  const dispatch = useDispatch();
+
+  const onSubmit = values => dispatch(signUpAction(values));
+  const validate = values => console.log('VALIDATED', values);
+
+  const { form, handleSubmit, pristine, submitting } = useForm({
+    onSubmit,
+    validate
+  });
+
+  const email = useField('email', form);
+  const fullName = useField('fullName', form);
+  const userName = useField('userName', form);
+  const password = useField('password', form);
 
   const textFieldProps = {
     variant: 'filled',
@@ -92,27 +102,43 @@ function _SignUpPage({ classes }) {
     className: classes.textField
   };
   const emailProps = {
+    ...email.input,
     ...textFieldProps,
     label: 'Email'
   };
   const fullNameProps = {
+    ...fullName.input,
     ...textFieldProps,
     label: 'Full Name'
   };
   const userNameProps = {
+    ...userName.input,
     ...textFieldProps,
-    label: 'Username'
+    label: 'Username',
+    autoComplete: 'username'
   };
   const passwordProps = {
+    ...password.input,
     ...textFieldProps,
     label: 'Password',
-    type: 'password'
+    type: 'password',
+    autoComplete: 'new-password'
   };
   const buttonProps = {
+    type: 'submit',
+    disabled: pristine || submitting,
     variant: 'contained',
     fullWidth: true,
     color: 'primary',
     className: classes.button
+  };
+  const cardHeaderProps = {
+    title: 'Instaclone',
+    subheader: 'Sign up to see photos from your friends.',
+    classes: {
+      title: classes.cardHeaderTitle,
+      subheader: classes.cardHeaderSubHeader
+    }
   };
 
   return (
@@ -126,11 +152,13 @@ function _SignUpPage({ classes }) {
             iconColor="white"
           />
           <OR />
-          <TextField {...emailProps} />
-          <TextField {...fullNameProps} />
-          <TextField {...userNameProps} />
-          <TextField {...passwordProps} />
-          <Button {...buttonProps}>Sign Up</Button>
+          <form onSubmit={handleSubmit}>
+            <TextField {...emailProps} />
+            <TextField {...fullNameProps} />
+            <TextField {...userNameProps} />
+            <TextField {...passwordProps} />
+            <Button {...buttonProps}>Sign Up</Button>
+          </form>
         </Card>
         <Login />
       </article>
