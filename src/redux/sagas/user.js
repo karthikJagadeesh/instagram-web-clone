@@ -6,7 +6,9 @@ function* signUp({ data, path }) {
   try {
     const response = yield apply(client, client.post, [path, data]);
     return response;
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export function* signUpSaga() {

@@ -9,7 +9,7 @@ import CardHeader from '@material-ui/core/CardHeader';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
 import { signUpAction } from '../../redux/actions/user';
 
@@ -21,7 +21,7 @@ const card = {
   marginBottom: 10
 };
 
-const loginStyles = {
+const useLoginStyles = makeStyles({
   card: {
     ...card,
     display: 'grid',
@@ -32,9 +32,11 @@ const loginStyles = {
   signUpButton: {
     justifySelf: 'start'
   }
-};
+});
 
-function _Login({ classes }) {
+function Login() {
+  const classes = useLoginStyles();
+
   return (
     <Card className={classes.card}>
       <Typography align="right" variant="body2">
@@ -49,9 +51,7 @@ function _Login({ classes }) {
   );
 }
 
-const Login = withStyles(loginStyles)(_Login);
-
-const signUpPageStyles = {
+const useSignUpPageStyles = makeStyles({
   card,
 
   section: {
@@ -76,17 +76,37 @@ const signUpPageStyles = {
   },
 
   button: {
-    margin: '8px 0px'
+    margin: '10px 0px 16px 0px'
   }
-};
+});
 
-function _SignUpPage({ classes }) {
+function SignUpPage() {
+  const classes = useSignUpPageStyles();
   const dispatch = useDispatch();
 
-  const onSubmit = values => dispatch(signUpAction(values));
-  const validate = values => console.log('VALIDATED', values);
+  const onSubmit = values => {
+    dispatch(signUpAction(values));
+  };
+  const validate = ({ email, fullName, userName, password }) => {
+    const errors = {};
+    if (!email) {
+      errors.email = 'Email is required.';
+    }
+    if (!fullName) {
+      errors.fullName = 'Fullname is required.';
+    }
+    if (!userName) {
+      errors.userName = 'Username is required.';
+    }
+    if (!password) {
+      errors.password = 'Password is required.';
+    } else if (password.length < 6) {
+      errors.password = 'Password should be 6 or more characters.';
+    }
+    return errors;
+  };
 
-  const { form, handleSubmit, pristine, submitting } = useForm({
+  const { form, handleSubmit, submitting, submitFailed, errors } = useForm({
     onSubmit,
     validate
   });
@@ -104,29 +124,39 @@ function _SignUpPage({ classes }) {
   const emailProps = {
     ...email.input,
     ...textFieldProps,
-    label: 'Email'
+    error: email.meta.error && email.meta.submitFailed,
+    label: 'Email',
+    type: 'email'
   };
   const fullNameProps = {
     ...fullName.input,
     ...textFieldProps,
+    error: fullName.meta.error && fullName.meta.submitFailed,
     label: 'Full Name'
   };
   const userNameProps = {
     ...userName.input,
     ...textFieldProps,
+    error: userName.meta.error && userName.meta.submitFailed,
     label: 'Username',
     autoComplete: 'username'
   };
   const passwordProps = {
     ...password.input,
     ...textFieldProps,
+    error: password.meta.error && password.meta.submitFailed,
     label: 'Password',
     type: 'password',
     autoComplete: 'new-password'
   };
+  const disableButton =
+    email.meta.pristine ||
+    fullName.meta.pristine ||
+    password.meta.pristine ||
+    userName.meta.pristine;
   const buttonProps = {
     type: 'submit',
-    disabled: pristine || submitting,
+    disabled: disableButton || submitting,
     variant: 'contained',
     fullWidth: true,
     color: 'primary',
@@ -159,13 +189,16 @@ function _SignUpPage({ classes }) {
             <TextField {...passwordProps} />
             <Button {...buttonProps}>Sign Up</Button>
           </form>
+          {submitFailed && (
+            <Typography align="center" color="error" variant="body2" paragraph>
+              {Object.values(errors)[0]}
+            </Typography>
+          )}
         </Card>
         <Login />
       </article>
     </section>
   );
 }
-
-const SignUpPage = withStyles(signUpPageStyles)(_SignUpPage);
 
 export default SignUpPage;

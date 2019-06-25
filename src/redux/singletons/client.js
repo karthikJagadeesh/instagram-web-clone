@@ -8,7 +8,7 @@ class Client {
   }
 
   async post(url, payload) {
-    const _response = fetch(`${this.baseURL}${url}`, {
+    const _response = await fetch(`${this.baseURL}${url}`, {
       headers: this.headers,
       method: 'POST',
       body: JSON.stringify(payload)
