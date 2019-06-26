@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
+import { ConnectedRouter } from 'connected-react-router';
 
 import ThemeProvider from '../components/utils/theme';
+import { history } from '../redux/singletons/store';
 
 import AccountRoutes from './Accounts';
 
@@ -42,12 +44,12 @@ function Layout() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <Router>
+        <ConnectedRouter history={history}>
           <Switch>
             <Route path="/accounts" component={AccountRoutes} />
             <Route component={AccountRoutes} />
           </Switch>
-        </Router>
+        </ConnectedRouter>
       </ThemeProvider>
     </ErrorBoundary>
   );

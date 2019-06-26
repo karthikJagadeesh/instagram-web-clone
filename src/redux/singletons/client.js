@@ -1,3 +1,10 @@
+class InstaError extends Error {
+  constructor(error) {
+    super('An error occurred in the API');
+    this.error = error;
+  }
+}
+
 class Client {
   constructor() {
     this.baseURL = 'https://instaclone-api.now.sh';
@@ -14,6 +21,9 @@ class Client {
       body: JSON.stringify(payload)
     });
     const response = await _response.json();
+    if (response.error) {
+      throw new InstaError(response.error);
+    }
     return response;
   }
 }

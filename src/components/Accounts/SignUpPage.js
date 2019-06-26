@@ -1,11 +1,12 @@
-import React from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useForm, useField } from 'react-final-form-hooks';
 
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
+import CirclularProgress from '@material-ui/core/CircularProgress';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 
@@ -13,6 +14,7 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { signUpAction } from '../../redux/actions/user';
 
+import { ErrorText } from '../utils';
 import { OR, LoginWithFacebook } from './utils';
 
 const card = {
@@ -77,15 +79,30 @@ const useSignUpPageStyles = makeStyles({
 
   button: {
     margin: '10px 0px 16px 0px'
+  },
+
+  circlularProgress: {
+    position: 'absolute',
+    color: '#464646'
   }
 });
 
 function SignUpPage() {
   const classes = useSignUpPageStyles();
   const dispatch = useDispatch();
+  const [formError, formState] = useSelector(state => [
+    state.ui.form.error,
+    state.ui.form
+  ]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    formState && setLoading(false);
+  }, [formState]);
 
   const onSubmit = values => {
     dispatch(signUpAction(values));
+    setLoading(true);
   };
   const validate = ({ email, fullName, userName, password }) => {
     const errors = {};
@@ -153,10 +170,12 @@ function SignUpPage() {
     email.meta.pristine ||
     fullName.meta.pristine ||
     password.meta.pristine ||
-    userName.meta.pristine;
+    userName.meta.pristine ||
+    submitting ||
+    loading;
   const buttonProps = {
     type: 'submit',
-    disabled: disableButton || submitting,
+    disabled: disableButton,
     variant: 'contained',
     fullWidth: true,
     color: 'primary',
@@ -170,30 +189,36 @@ function SignUpPage() {
       subheader: classes.cardHeaderSubHeader
     }
   };
+  const loginWithFacebookProps = {
+    variant: 'contained',
+    color: 'primary',
+    iconColor: 'white'
+  };
 
   return (
     <section className={classes.section}>
       <article>
         <Card className={classes.card}>
           <CardHeader {...cardHeaderProps} />
-          <LoginWithFacebook
-            variant="contained"
-            color="primary"
-            iconColor="white"
-          />
+          <LoginWithFacebook {...loginWithFacebookProps} />
           <OR />
           <form onSubmit={handleSubmit}>
             <TextField {...emailProps} />
             <TextField {...fullNameProps} />
             <TextField {...userNameProps} />
             <TextField {...passwordProps} />
-            <Button {...buttonProps}>Sign Up</Button>
+            <Button {...buttonProps}>
+              {loading && (
+                <CirclularProgress
+                  className={classes.circlularProgress}
+                  size={24}
+                />
+              )}
+              Sign Up
+            </Button>
           </form>
-          {submitFailed && (
-            <Typography align="center" color="error" variant="body2" paragraph>
-              {Object.values(errors)[0]}
-            </Typography>
-          )}
+          {submitFailed && <ErrorText errorText={Object.values(errors)[0]} />}
+          {formError && <ErrorText errorText={formError} />}
         </Card>
         <Login />
       </article>
