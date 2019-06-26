@@ -6,7 +6,8 @@ import {
   SET_AUTH_TOKEN,
   FORM_ERROR,
   FORM_SUCCESS,
-  SIGN_UP
+  SIGN_UP,
+  SHOW_MESSAGE
 } from '../constants';
 
 function* setAuthToken({ token }) {
@@ -18,6 +19,7 @@ function* signUp({ data, path }) {
   try {
     const response = yield apply(client, client.post, [path, data]);
     yield put({ type: FORM_SUCCESS });
+    yield put({ type: SHOW_MESSAGE, message: response.data });
     yield put(push('/login'));
     return response;
   } catch ({ error }) {
@@ -26,7 +28,7 @@ function* signUp({ data, path }) {
   }
 }
 
-export function* signUpSaga() {
+export function* userSaga() {
   yield takeEvery(SIGN_UP, signUp);
   yield takeEvery(SET_AUTH_TOKEN, setAuthToken);
 }

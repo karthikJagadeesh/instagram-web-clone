@@ -1,7 +1,9 @@
 import { fork } from 'redux-saga/effects';
 
-import { signUpSaga } from './user';
+import { userSaga } from './user';
+import { uiSaga } from './ui';
 
 export default function*() {
-  yield fork(signUpSaga);
+  yield fork(userSaga);
+  yield fork(uiSaga);
 }

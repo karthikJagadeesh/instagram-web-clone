@@ -1,7 +1,16 @@
-import { FORM_ERROR, FORM_SUCCESS } from '../constants';
+import {
+  FORM_ERROR,
+  FORM_SUCCESS,
+  OPEN_SNACKBAR,
+  CLOSE_SNACKBAR
+} from '../constants';
 
 const initialState = {
-  form: {}
+  form: {},
+  snackbar: {
+    open: false,
+    message: ''
+  }
 };
 
 export default function(state = initialState, action) {
@@ -19,6 +28,24 @@ export default function(state = initialState, action) {
       return {
         ...state,
         form: {}
+      };
+
+    case OPEN_SNACKBAR:
+      return {
+        ...state,
+        snackbar: {
+          open: true,
+          message: action.message
+        }
+      };
+
+    case CLOSE_SNACKBAR:
+      return {
+        ...state,
+        snackbar: {
+          open: false,
+          message: ''
+        }
       };
 
     default:

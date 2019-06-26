@@ -1,11 +1,45 @@
 import React, { Component } from 'react';
+import { useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 import { ConnectedRouter } from 'connected-react-router';
+
+import Snackbar from '@material-ui/core/Snackbar';
+import Slide from '@material-ui/core/Slide';
+
+import { makeStyles } from '@material-ui/core/styles';
 
 import ThemeProvider from '../components/utils/theme';
 import { history } from '../redux/singletons/store';
 
 import AccountRoutes from './Accounts';
+
+const useStyles = makeStyles(theme => ({
+  snackbar: {
+    '& div': {
+      borderRadius: 25,
+      color: theme.palette.secondary.main,
+      background: '#ffffff'
+    }
+  }
+}));
+
+function Message() {
+  const classes = useStyles();
+
+  const [open, message] = useSelector(state => [
+    state.ui.snackbar.open,
+    state.ui.snackbar.message
+  ]);
+
+  return (
+    <Snackbar
+      open={open}
+      TransitionComponent={Slide}
+      message={<span>{message}</span>}
+      className={classes.snackbar}
+    />
+  );
+}
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -49,6 +83,7 @@ function Layout() {
             <Route path="/accounts" component={AccountRoutes} />
             <Route component={AccountRoutes} />
           </Switch>
+          <Message />
         </ConnectedRouter>
       </ThemeProvider>
     </ErrorBoundary>
