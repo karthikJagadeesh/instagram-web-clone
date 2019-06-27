@@ -1,7 +1,7 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 
-export function ErrorText({ errorText, ...props }) {
+export function ErrorText({ text, ...props }) {
   return (
     <Typography
       align="center"
@@ -10,7 +10,7 @@ export function ErrorText({ errorText, ...props }) {
       paragraph
       {...props}
     >
-      {errorText}
+      {text}
     </Typography>
   );
 }

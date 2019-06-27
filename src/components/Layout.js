@@ -16,6 +16,7 @@ import AccountRoutes from './Accounts';
 const useStyles = makeStyles(theme => ({
   snackbar: {
     '& div': {
+      justifyContent: 'center',
       borderRadius: 25,
       color: theme.palette.secondary.main,
       background: '#ffffff'

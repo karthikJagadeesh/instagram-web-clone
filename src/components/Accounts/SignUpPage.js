@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useForm, useField } from 'react-final-form-hooks';
 
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
-import CirclularProgress from '@material-ui/core/CircularProgress';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 
@@ -15,7 +14,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { signUpAction } from '../../redux/actions/user';
 
 import { ErrorText } from '../utils';
-import { OR, LoginWithFacebook } from './utils';
+import { Loader, LoginWithFacebook, OR, useLoader } from './utils';
 
 const card = {
   maxWidth: 348,
@@ -79,26 +78,13 @@ const useSignUpPageStyles = makeStyles({
 
   button: {
     margin: '10px 0px 16px 0px'
-  },
-
-  circlularProgress: {
-    position: 'absolute',
-    color: '#464646'
   }
 });
 
 function SignUpPage() {
   const classes = useSignUpPageStyles();
   const dispatch = useDispatch();
-  const [formError, formState] = useSelector(state => [
-    state.ui.form.error,
-    state.ui.form
-  ]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    formState && setLoading(false);
-  }, [formState]);
+  const { loading, setLoading, formError } = useLoader();
 
   const onSubmit = values => {
     dispatch(signUpAction(values));
@@ -208,17 +194,12 @@ function SignUpPage() {
             <TextField {...userNameProps} />
             <TextField {...passwordProps} />
             <Button {...buttonProps}>
-              {loading && (
-                <CirclularProgress
-                  className={classes.circlularProgress}
-                  size={24}
-                />
-              )}
+              {loading && <Loader />}
               Sign Up
             </Button>
           </form>
-          {submitFailed && <ErrorText errorText={Object.values(errors)[0]} />}
-          {formError && <ErrorText errorText={formError} />}
+          {submitFailed && <ErrorText text={Object.values(errors)[0]} />}
+          {formError && <ErrorText text={formError} />}
         </Card>
         <Login />
       </article>
