@@ -1,6 +1,6 @@
 import {
   FORM_ERROR,
-  FORM_SUCCESS,
+  CLEAR_FORM_ERROR,
   OPEN_SNACKBAR,
   CLOSE_SNACKBAR
 } from '../constants';
@@ -24,7 +24,7 @@ export default function(state = initialState, action) {
         }
       };
 
-    case FORM_SUCCESS:
+    case CLEAR_FORM_ERROR:
       return {
         ...state,
         form: {}
