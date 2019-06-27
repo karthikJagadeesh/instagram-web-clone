@@ -5,13 +5,17 @@ import LoginPage from './LoginPage';
 import SignUpPage from './SignUpPage';
 import ForgotPasswordPage from './ForgotPasswordPage';
 
-function AccountRoutes() {
+function AccountRoutes({ match: { path } }) {
   return (
     <Switch>
-      <Route path="/signup" component={SignUpPage} />
-      <Route path="/login" component={LoginPage} />
-      <Route path="/password" component={ForgotPasswordPage} />
-      <Route component={() => <Redirect to="/login" push />} />
+      <Route exact path={`${path}/signup`} component={SignUpPage} />
+      <Route exact path={`${path}/login`} component={LoginPage} />
+      <Route
+        exact
+        path={`${path}/password/reset`}
+        component={ForgotPasswordPage}
+      />
+      <Route component={() => <Redirect to={`${path}/login`} push />} />
     </Switch>
   );
 }

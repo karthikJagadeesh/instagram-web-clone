@@ -43,7 +43,7 @@ function Login() {
       <Typography align="right" variant="body2">
         Have an account?
       </Typography>
-      <Link to="/login">
+      <Link to="/account/login">
         <Button color="primary" className={classes.signUpButton}>
           Log in
         </Button>

@@ -43,7 +43,7 @@ function SignUp() {
       <Typography align="right" variant="body2">
         {"Don't have an account?"}
       </Typography>
-      <Link to="/signup">
+      <Link to="/account/signup">
         <Button color="primary" className={classes.signUpButton}>
           Sign up
         </Button>
@@ -54,7 +54,7 @@ function SignUp() {
 
 function ForgotPassword() {
   return (
-    <Link to="/password">
+    <Link to="/account/password/reset">
       <Button fullWidth color="secondary">
         <Typography variant="caption">Forgot password?</Typography>
       </Button>

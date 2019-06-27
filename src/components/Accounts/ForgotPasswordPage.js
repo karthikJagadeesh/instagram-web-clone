@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Redirect, Route, Switch } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
@@ -54,7 +54,7 @@ const useStyles = makeStyles({
   }
 });
 
-function ResetPage() {
+export default function ResetPage() {
   const classes = useStyles();
 
   const userNameProps = {
@@ -100,7 +100,7 @@ function ResetPage() {
             </Link>
           </CardContent>
           <Divider className={classes.divider} />
-          <Link to="/login">
+          <Link to="/account/login">
             <Button fullWidth className={classes.button}>
               Back To Login
             </Button>
@@ -110,14 +110,3 @@ function ResetPage() {
     </section>
   );
 }
-
-function ForgotPasswordPage({ match: { path } }) {
-  return (
-    <Switch>
-      <Route exact path={`${path}/reset`} component={ResetPage} />
-      <Route component={() => <Redirect to={`${path}/reset`} push />} />
-    </Switch>
-  );
-}
-
-export default ForgotPasswordPage;

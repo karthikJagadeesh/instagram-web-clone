@@ -9,7 +9,8 @@ import {
   SIGN_UP,
   LOG_IN,
   SHOW_MESSAGE,
-  LOCATION_CHANGE
+  LOCATION_CHANGE,
+  LOG_IN_SUCCESS
 } from '../constants';
 
 function* setAuthToken({ token }) {
@@ -23,6 +24,8 @@ function* logIn({ data, path }) {
     yield put({ type: CLEAR_FORM_ERROR });
     yield put({ type: SHOW_MESSAGE, message: response.message });
     yield put({ type: SET_AUTH_TOKEN, token: response.token });
+    yield put({ type: LOG_IN_SUCCESS });
+    yield put(push('/'));
     return response;
   } catch ({ error }) {
     yield put({ type: FORM_ERROR, error });

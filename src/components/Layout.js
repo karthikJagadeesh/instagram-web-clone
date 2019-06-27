@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { useSelector } from 'react-redux';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { ConnectedRouter } from 'connected-react-router';
 
 import Snackbar from '@material-ui/core/Snackbar';
@@ -12,6 +12,7 @@ import ThemeProvider from '../components/utils/theme';
 import { history } from '../redux/singletons/store';
 
 import AccountRoutes from './Accounts';
+import Feed from './Feed';
 
 const useStyles = makeStyles(theme => ({
   snackbar: {
@@ -76,13 +77,19 @@ class ErrorBoundary extends Component {
 }
 
 function Layout() {
+  const signedIn = useSelector(state => state.user.signedIn);
+
   return (
     <ErrorBoundary>
       <ThemeProvider>
         <ConnectedRouter history={history}>
           <Switch>
-            <Route path="/accounts" component={AccountRoutes} />
-            <Route component={AccountRoutes} />
+            <Route path="/account" component={AccountRoutes} />
+            <Route
+              component={
+                signedIn ? Feed : () => <Redirect to="/account" push />
+              }
+            />
           </Switch>
           <Message />
         </ConnectedRouter>
