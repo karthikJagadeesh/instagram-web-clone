@@ -1,5 +1,18 @@
 import React from 'react';
+import { Route, Switch } from 'react-router-dom';
 
-export default function Feed() {
-  return <div>HELLO</div>;
+import Feed from './Feed';
+import TopNavigation from './TopNavigation';
+
+function AuthenticatedRoutes() {
+  return (
+    <>
+      <TopNavigation />
+      <Switch>
+        <Route component={Feed} />
+      </Switch>
+    </>
+  );
 }
+
+export default AuthenticatedRoutes;

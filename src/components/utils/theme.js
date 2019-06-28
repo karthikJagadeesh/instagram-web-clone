@@ -50,6 +50,21 @@ const theme = createMuiTheme({
         boxShadow: 'none',
         border: '1px solid #e6e6e6'
       }
+    },
+
+    MuiAppBar: {
+      root: {
+        boxShadow: 'none',
+        borderBottom: '1px solid #e6e6e6'
+      }
+    },
+
+    MuiInputAdornment: {
+      root: {
+        '&$filled&$positionStart': {
+          margin: 0
+        }
+      }
     }
   }
 });

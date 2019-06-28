@@ -78,6 +78,7 @@ class ErrorBoundary extends Component {
 
 function Layout() {
   const signedIn = useSelector(state => state.user.signedIn);
+  const secretInLocalStorage = localStorage.getItem('secret');
 
   return (
     <ErrorBoundary>
@@ -87,7 +88,9 @@ function Layout() {
             <Route path="/account" component={AccountRoutes} />
             <Route
               component={
-                signedIn ? Feed : () => <Redirect to="/account" push />
+                signedIn || secretInLocalStorage
+                  ? Feed
+                  : () => <Redirect to="/account" push />
               }
             />
           </Switch>
