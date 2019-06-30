@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 import AppBar from '@material-ui/core/AppBar';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -7,8 +8,8 @@ import Typography from '@material-ui/core/Typography';
 
 import { makeStyles } from '@material-ui/core/styles';
 
-import IconsSpriteSheet2 from '../../images/icons-spritesheet2.png';
-import IconsSpriteSheet1 from '../../images/icons-spritesheet.png';
+import IconsSpriteSheet2 from '../images/icons-spritesheet2.png';
+import IconsSpriteSheet1 from '../images/icons-spritesheet.png';
 
 const userStyles = makeStyles(() => {
   const common = {
@@ -32,26 +33,34 @@ const userStyles = makeStyles(() => {
     notifications: {
       ...common,
       backgroundSize: '355px 344px',
-      backgroundPosition: '-275px -270px',
-      marginLeft: 30
+      backgroundPosition: '-275px -270px'
     },
     profile: {
       ...common,
       backgroundSize: '355px 344px',
-      backgroundPosition: '-125px -270px',
-      marginLeft: 30
+      backgroundPosition: '-125px -270px'
+    },
+    link: {
+      marginLeft: 30,
+      display: 'grid'
     }
   };
 });
 
-function User() {
+function User({ userName }) {
   const classes = userStyles();
 
   return (
     <div className={classes.wrapper}>
-      <span className={classes.explore} />
-      <span className={classes.notifications} />
-      <span className={classes.profile} />
+      <Link to={`/${userName}`} className={classes.link}>
+        <span className={classes.explore} />
+      </Link>
+      <Link to={`/${userName}`} className={classes.link}>
+        <span className={classes.notifications} />
+      </Link>
+      <Link to={`/${userName}`} className={classes.link}>
+        <span className={classes.profile} />
+      </Link>
     </div>
   );
 }
@@ -180,15 +189,14 @@ const useTopNavigationStyles = makeStyles({
   }
 });
 
-function TopNavigation() {
+function TopNavigation({ userName }) {
   const classes = useTopNavigationStyles();
-
   return (
     <AppBar position="fixed" className={classes.appBar}>
       <section className={classes.section}>
         <Title />
         <Search />
-        <User />
+        <User userName={userName} />
       </section>
     </AppBar>
   );

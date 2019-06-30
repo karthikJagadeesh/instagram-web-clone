@@ -78,7 +78,9 @@ class ErrorBoundary extends Component {
 
 function Layout() {
   const signedIn = useSelector(state => state.user.signedIn);
-  const secretInLocalStorage = localStorage.getItem('secret');
+  const secret =
+    localStorage.getItem('instaInfo') &&
+    JSON.parse(localStorage.getItem('instaInfo')).secret;
 
   return (
     <ErrorBoundary>
@@ -88,7 +90,7 @@ function Layout() {
             <Route path="/account" component={AccountRoutes} />
             <Route
               component={
-                signedIn || secretInLocalStorage
+                signedIn || secret
                   ? Feed
                   : () => <Redirect to="/account" push />
               }

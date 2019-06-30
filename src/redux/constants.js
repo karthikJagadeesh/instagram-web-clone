@@ -12,3 +12,6 @@ export const OPEN_SNACKBAR = 'OPEN_SNACKBAR';
 export const CLOSE_SNACKBAR = 'CLOSE_SNACKBAR';
 
 export const LOCATION_CHANGE = '@@router/LOCATION_CHANGE';
+
+export const GET_USER = 'GET_USER';
+export const GET_USER_SUCCESS = 'GET_USER_SUCCESS';
