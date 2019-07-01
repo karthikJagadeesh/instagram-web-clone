@@ -10,10 +10,14 @@ import ProfileRoutes from '../Profile';
 
 import Feed from './Feed';
 import TopNavigation from '../TopNavigation';
+import LoadingPage from '../LoadingPage';
 
 const useStyles = makeStyles({
   container: {
-    marginTop: 130
+    marginTop: 130,
+    display: 'grid',
+    gridTemplateColumns: 'minmax(auto, 935px)',
+    justifyContent: 'center'
   }
 });
 
@@ -27,7 +31,8 @@ function AuthenticatedRoutes() {
     dispatch(userActions.get(userId));
   }, [dispatch, userId]);
 
-  const withProps = Component => props => <Component user={user} {...props} />;
+  const withProps = Component => props =>
+    user ? <Component user={user} {...props} /> : <LoadingPage />;
 
   return (
     <>
@@ -40,7 +45,6 @@ function AuthenticatedRoutes() {
             component={withProps(ProfileRoutes)}
           />
           <Route exact path="/" component={withProps(Feed)} />
-          <Route component={() => <div>Loading...</div>} />
         </Switch>
       </section>
     </>

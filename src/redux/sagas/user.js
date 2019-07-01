@@ -47,7 +47,7 @@ function* signUp({ data, path }) {
     const response = yield apply(client, client.post, [path, data]);
     yield put({ type: CLEAR_FORM_ERROR });
     yield put({ type: SHOW_MESSAGE, message: response.message });
-    yield put(push('/login'));
+    yield put(push('/account/login'));
     return response;
   } catch ({ error }) {
     yield put({ type: FORM_ERROR, error });
