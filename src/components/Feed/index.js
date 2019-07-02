@@ -39,11 +39,7 @@ function AuthenticatedRoutes() {
       <TopNavigation userName={userName} />
       <section className={classes.container}>
         <Switch>
-          <Route
-            exact
-            path={`/${userName}`}
-            component={withProps(ProfileRoutes)}
-          />
+          <Route path={`/${userName}`} component={withProps(ProfileRoutes)} />
           <Route exact path="/" component={withProps(Feed)} />
         </Switch>
       </section>

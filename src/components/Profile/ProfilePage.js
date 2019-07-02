@@ -1,46 +1,16 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 
-import PersonIcon from '@material-ui/icons/Person';
 import Settings from '@material-ui/icons/Settings';
 
 import { makeStyles } from '@material-ui/core/styles';
 
-const useProfilePictureStyles = makeStyles({
-  person: {
-    color: '#ffffff',
-    height: 150,
-    width: 150
-  },
-  personWrapper: {
-    background: '#DBDBDB',
-    width: 150,
-    height: 150,
-    borderRadius: '50%',
-    display: 'grid',
-    placeItems: 'center'
-  },
-  personSection: {
-    display: 'grid',
-    justifyContent: 'center'
-  }
-});
-
-function ProfilePicture() {
-  const classes = useProfilePictureStyles();
-
-  return (
-    <section className={classes.personSection}>
-      <div className={classes.personWrapper}>
-        <PersonIcon className={classes.person} />
-      </div>
-    </section>
-  );
-}
+import { ProfilePicture } from './utils';
 
 const useProfileNameSectionStyles = makeStyles({
   userNameSection: {
@@ -71,15 +41,17 @@ const useProfileNameSectionStyles = makeStyles({
   }
 });
 
-function ProfileNameSection({ user: { userName } }) {
+function ProfileNameSection({ user: { userName }, path }) {
   const classes = useProfileNameSectionStyles();
 
   return (
     <section className={classes.userNameSection}>
       <Typography className={classes.userName}>{userName}</Typography>
-      <Button variant="outlined" className={classes.button}>
-        Edit Profile
-      </Button>
+      <Link to={`${path}/edit`}>
+        <Button variant="outlined" className={classes.button}>
+          Edit Profile
+        </Button>
+      </Link>
       <div className={classes.settingsWrapper}>
         <Settings className={classes.settings} />
       </div>
@@ -160,14 +132,14 @@ const useStyles = makeStyles({
   }
 });
 
-function ProfilePage({ user }) {
+function ProfilePage({ user, match: { path } }) {
   const classes = useStyles();
 
   return (
     <Card className={classes.card}>
       <ProfilePicture />
       <CardContent className={classes.cardContent}>
-        <ProfileNameSection user={user} />
+        <ProfileNameSection path={path} user={user} />
         <PostCountSection user={user} />
         <NameBioSection user={user} />
       </CardContent>
