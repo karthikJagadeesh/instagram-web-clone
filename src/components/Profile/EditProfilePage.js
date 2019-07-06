@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useForm, useField } from 'react-final-form-hooks';
 
 import Button from '@material-ui/core/Button';
 import Drawer from '@material-ui/core/Drawer';
@@ -15,6 +16,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { ProfilePicture } from './utils';
+import { ErrorText } from '../utils';
 
 const sectionItem = {
   display: 'grid',
@@ -38,18 +40,32 @@ const useSectionItemStyles = makeStyles(theme => ({
     [theme.breakpoints.down('xs')]: {
       display: 'unset'
     }
+  },
+
+  textFieldInput: {
+    padding: 10
   }
 }));
 
-function SectionItem({ text }) {
+function SectionItem({ text, formItem }) {
   const classes = useSectionItemStyles();
+
+  const textFieldProps = {
+    ...formItem.input,
+    variant: 'outlined',
+    fullWidth: true,
+    type: formItem.input.name === 'email' ? 'email' : 'text',
+    inputProps: {
+      className: classes.textFieldInput
+    }
+  };
 
   return (
     <div className={classes.sectionItem}>
       <aside>
         <Typography className={classes.typography}>{text}</Typography>
       </aside>
-      <TextField variant="outlined" fullWidth />
+      <TextField {...textFieldProps} />
     </div>
   );
 }
@@ -97,20 +113,87 @@ const useEditProfileStyles = makeStyles(theme => ({
     }
   },
 
+  form: {
+    display: 'grid'
+  },
+
+  typography,
   userNameDiv
 }));
 
 function EditProfile({ user }) {
   const classes = useEditProfileStyles();
 
+  const onSubmit = () => {};
+  const validate = ({ userName, fullName, bio, email, phoneNumber }) => {
+    const errors = {};
+    if (!email) {
+      errors.email = 'Email is required.';
+    }
+    if (!fullName) {
+      errors.fullName = 'Name is required.';
+    } else if (fullName && fullName.length > 30) {
+      errors.fullName = 'Enter a name under 30 characters.';
+    }
+    if (!userName) {
+      errors.userName = 'Username is required.';
+    } else if (userName && userName.length > 30) {
+      errors.userName = 'Enter a username under 30 characters.';
+    }
+
+    if (bio && bio.length > 130) {
+      errors.bio = 'Your bio must be 130 characters or fewer';
+    }
+    if (phoneNumber) {
+      const regex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+      if (!phoneNumber.match(regex)) {
+        errors.bio = 'Enter a valid phone number';
+      }
+    }
+
+    return errors;
+  };
+  const initialValues = {
+    fullName: user.fullName || '',
+    userName: user.userName || '',
+    website: user.website || '',
+    bio: user.bio || '',
+    email: user.email || '',
+    phoneNumber: user.phoneNumber || ''
+  };
+
+  const {
+    form,
+    handleSubmit,
+    submitting,
+    pristine,
+    submitFailed,
+    errors
+  } = useForm({
+    onSubmit,
+    validate,
+    initialValues
+  });
+
+  const fullName = useField('fullName', form);
+  const userName = useField('userName', form);
+  const website = useField('website', form);
+  const bio = useField('bio', form);
+  const email = useField('email', form);
+  const phoneNumber = useField('phoneNumber', form);
+
   const textFieldProps = {
+    ...bio.input,
     variant: 'outlined',
     multiline: true,
     rowsMax: 3,
     rows: 3,
     fullWidth: true
   };
+
   const buttonProps = {
+    disabled: pristine || submitting,
+    type: 'submit',
     variant: 'contained',
     color: 'primary',
     className: classes.userNameDiv
@@ -119,31 +202,34 @@ function EditProfile({ user }) {
   return (
     <section className={classes.section}>
       <PictureSectionItem user={user} />
-      <SectionItem text="Name" />
-      <SectionItem text="Username" />
-      <SectionItem text="Website" />
+      <form onSubmit={handleSubmit} className={classes.form}>
+        <SectionItem text="Name" formItem={fullName} />
+        <SectionItem text="Username" formItem={userName} />
+        <SectionItem text="Website" formItem={website} />
 
-      <div className={classes.sectionItem}>
-        <aside>
-          <Typography className={classes.typography}>Bio</Typography>
-        </aside>
-        <TextField {...textFieldProps} />
-      </div>
+        <div className={classes.sectionItem}>
+          <aside>
+            <Typography className={classes.typography}>Bio</Typography>
+          </aside>
+          <TextField {...textFieldProps} />
+        </div>
 
-      <div className={classes.sectionItem}>
-        <div />
-        <Typography color="textSecondary" className={classes.userNameDiv}>
-          Private information
-        </Typography>
-      </div>
+        <div className={classes.sectionItem}>
+          <div />
+          <Typography color="textSecondary" className={classes.userNameDiv}>
+            Private information
+          </Typography>
+        </div>
 
-      <SectionItem text="Email" />
-      <SectionItem text="Phone Number" />
+        <SectionItem text="Email" formItem={email} />
+        <SectionItem text="Phone Number" formItem={phoneNumber} />
 
-      <div className={classes.sectionItem}>
-        <div />
-        <Button {...buttonProps}>Submit</Button>
-      </div>
+        <div className={classes.sectionItem}>
+          <div />
+          <Button {...buttonProps}>Submit</Button>
+        </div>
+      </form>
+      {submitFailed && <ErrorText text={Object.values(errors)[0]} />}
     </section>
   );
 }
