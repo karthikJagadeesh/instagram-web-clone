@@ -30,7 +30,6 @@ function* logIn({ data, path }) {
       path,
       data
     ]);
-    yield put({ type: CLEAR_FORM_ERROR });
     yield put({ type: SHOW_MESSAGE, message });
     yield put({ type: SET_AUTH_TOKEN, token, userInfo });
     yield put({ type: LOG_IN_SUCCESS });
@@ -45,7 +44,6 @@ function* logIn({ data, path }) {
 function* signUp({ data, path }) {
   try {
     const response = yield apply(client, client.post, [path, data]);
-    yield put({ type: CLEAR_FORM_ERROR });
     yield put({ type: SHOW_MESSAGE, message: response.message });
     yield put(push('/account/login'));
     return response;

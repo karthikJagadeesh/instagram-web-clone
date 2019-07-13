@@ -5,7 +5,7 @@ export default function(state = {}, action) {
     case GET_USER_SUCCESS:
       return {
         ...state,
-        user: action.response
+        user: action.data
       };
 
     default:

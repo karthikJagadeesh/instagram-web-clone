@@ -1,5 +1,11 @@
-import { GET_USER } from '../constants';
+import { GET_USER, UPDATE_USER } from '../constants';
 
 export const userActions = {
-  get: query => ({ type: GET_USER, path: '/users', data: query })
+  get: params => ({ type: GET_USER, path: '/users', params }),
+  update: ({ payload, params }) => ({
+    type: UPDATE_USER,
+    path: '/users',
+    payload,
+    params
+  })
 };

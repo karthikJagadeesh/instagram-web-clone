@@ -14,7 +14,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { logInAction } from '../../redux/actions/user';
 
 import { ErrorText } from '../utils';
-import { Loader, LoginWithFacebook, OR, useLoader } from './utils';
+import { LoginWithFacebook, OR } from './utils';
+import { Loader, useLoader } from '../utils';
 
 const card = {
   maxWidth: 348,

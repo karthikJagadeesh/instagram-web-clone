@@ -26,8 +26,8 @@ class Client {
     this.headers.Authorization = `Bearer ${secret}`;
   }
 
-  async get(path, query) {
-    const url = `${path}/${query}`;
+  async get(path, params) {
+    const url = `${path}/${params}`;
     const _response = await this.client({ method: 'GET', url });
     const response = await _response.json();
     if (response.error) {
@@ -38,6 +38,20 @@ class Client {
 
   async post(path, payload) {
     const _response = await this.client({ method: 'POST', url: path, payload });
+    const response = await _response.json();
+    if (response.error) {
+      throw new InstaError(response.error);
+    }
+    return response;
+  }
+
+  async update(path, params, payload) {
+    const url = `${path}/${params}`;
+    const _response = await this.client({
+      method: 'PUT',
+      url,
+      payload
+    });
     const response = await _response.json();
     if (response.error) {
       throw new InstaError(response.error);

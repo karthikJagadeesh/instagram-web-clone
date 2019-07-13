@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useForm, useField } from 'react-final-form-hooks';
 
 import Button from '@material-ui/core/Button';
@@ -15,8 +16,10 @@ import MenuIcon from '@material-ui/icons/Menu';
 
 import { makeStyles } from '@material-ui/core/styles';
 
+import { userActions } from '../../redux/actions/api';
+
 import { ProfilePicture } from './utils';
-import { ErrorText } from '../utils';
+import { ErrorText, Loader, useLoader } from '../utils';
 
 const sectionItem = {
   display: 'grid',
@@ -29,7 +32,7 @@ const sectionItem = {
 const typography = {
   fontWeight: 600
 };
-const userNameDiv = {
+const justifySelfStart = {
   justifySelf: 'start'
 };
 
@@ -52,6 +55,7 @@ function SectionItem({ text, formItem }) {
 
   const textFieldProps = {
     ...formItem.input,
+    error: formItem.meta.error && formItem.meta.submitFailed,
     variant: 'outlined',
     fullWidth: true,
     type: formItem.input.name === 'email' ? 'email' : 'text',
@@ -71,7 +75,7 @@ function SectionItem({ text, formItem }) {
 }
 
 const usePictureSectionItemStyles = makeStyles(theme => ({
-  userNameDiv,
+  justifySelfStart,
   typography,
 
   pictureSectionItem: {
@@ -89,7 +93,7 @@ function PictureSectionItem({ user }) {
   return (
     <div className={classes.pictureSectionItem}>
       <ProfilePicture size={38} />
-      <div className={classes.userNameDiv}>
+      <div className={classes.justifySelfStart}>
         <Typography className={classes.typography}>{user.userName}</Typography>
         <Typography color="primary" variant="body2">
           Change Profile Photo
@@ -118,14 +122,20 @@ const useEditProfileStyles = makeStyles(theme => ({
   },
 
   typography,
-  userNameDiv
+  justifySelfStart
 }));
 
 function EditProfile({ user }) {
   const classes = useEditProfileStyles();
+  const dispatch = useDispatch();
+  const { loading, setLoading, formError } = useLoader();
 
-  const onSubmit = () => {};
-  const validate = ({ userName, fullName, bio, email, phoneNumber }) => {
+  const onSubmit = payload => {
+    dispatch(userActions.update({ payload, params: user.id }));
+    setLoading(true);
+  };
+
+  const validate = ({ fullName, bio, email, phoneNumber }) => {
     const errors = {};
     if (!email) {
       errors.email = 'Email is required.';
@@ -135,27 +145,21 @@ function EditProfile({ user }) {
     } else if (fullName && fullName.length > 30) {
       errors.fullName = 'Enter a name under 30 characters.';
     }
-    if (!userName) {
-      errors.userName = 'Username is required.';
-    } else if (userName && userName.length > 30) {
-      errors.userName = 'Enter a username under 30 characters.';
-    }
-
     if (bio && bio.length > 130) {
       errors.bio = 'Your bio must be 130 characters or fewer';
     }
     if (phoneNumber) {
       const regex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
       if (!phoneNumber.match(regex)) {
-        errors.bio = 'Enter a valid phone number';
+        errors.phoneNumber = 'Enter a valid phone number';
       }
     }
 
     return errors;
   };
+
   const initialValues = {
     fullName: user.fullName || '',
-    userName: user.userName || '',
     website: user.website || '',
     bio: user.bio || '',
     email: user.email || '',
@@ -176,7 +180,6 @@ function EditProfile({ user }) {
   });
 
   const fullName = useField('fullName', form);
-  const userName = useField('userName', form);
   const website = useField('website', form);
   const bio = useField('bio', form);
   const email = useField('email', form);
@@ -192,11 +195,11 @@ function EditProfile({ user }) {
   };
 
   const buttonProps = {
-    disabled: pristine || submitting,
+    disabled: pristine || submitting || loading,
     type: 'submit',
     variant: 'contained',
     color: 'primary',
-    className: classes.userNameDiv
+    className: classes.justifySelfStart
   };
 
   return (
@@ -204,7 +207,6 @@ function EditProfile({ user }) {
       <PictureSectionItem user={user} />
       <form onSubmit={handleSubmit} className={classes.form}>
         <SectionItem text="Name" formItem={fullName} />
-        <SectionItem text="Username" formItem={userName} />
         <SectionItem text="Website" formItem={website} />
 
         <div className={classes.sectionItem}>
@@ -216,7 +218,10 @@ function EditProfile({ user }) {
 
         <div className={classes.sectionItem}>
           <div />
-          <Typography color="textSecondary" className={classes.userNameDiv}>
+          <Typography
+            color="textSecondary"
+            className={classes.justifySelfStart}
+          >
             Private information
           </Typography>
         </div>
@@ -226,10 +231,21 @@ function EditProfile({ user }) {
 
         <div className={classes.sectionItem}>
           <div />
-          <Button {...buttonProps}>Submit</Button>
+          <Button {...buttonProps}>{loading && <Loader />}Submit</Button>
         </div>
       </form>
-      {submitFailed && <ErrorText text={Object.values(errors)[0]} />}
+      <div className={classes.sectionItem}>
+        <div />
+        {submitFailed && (
+          <ErrorText
+            text={Object.values(errors)[0]}
+            className={classes.justifySelfStart}
+          />
+        )}
+        {formError && (
+          <ErrorText text={formError} className={classes.justifySelfStart} />
+        )}
+      </div>
     </section>
   );
 }
