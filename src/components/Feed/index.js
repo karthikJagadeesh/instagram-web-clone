@@ -12,13 +12,25 @@ import Feed from './Feed';
 import TopNavigation from '../TopNavigation';
 import LoadingPage from '../LoadingPage';
 
-const useStyles = makeStyles({
-  container: {
-    marginTop: 130,
+const useStyles = makeStyles(theme => {
+  const containerLarge = {
+    margin: '130px 0px 50px',
     display: 'grid',
     gridTemplateColumns: 'minmax(auto, 935px)',
     justifyContent: 'center'
-  }
+  };
+
+  return {
+    container: {
+      [theme.breakpoints.up('sm')]: {
+        ...containerLarge
+      },
+      [theme.breakpoints.down('xs')]: {
+        ...containerLarge,
+        marginTop: 100
+      }
+    }
+  };
 });
 
 function AuthenticatedRoutes() {

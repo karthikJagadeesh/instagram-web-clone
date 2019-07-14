@@ -238,12 +238,17 @@ function EditProfile({ user }) {
         <div />
         {submitFailed && (
           <ErrorText
+            align="left"
             text={Object.values(errors)[0]}
             className={classes.justifySelfStart}
           />
         )}
         {formError && (
-          <ErrorText text={formError} className={classes.justifySelfStart} />
+          <ErrorText
+            align="left"
+            text={formError}
+            className={classes.justifySelfStart}
+          />
         )}
       </div>
     </section>
