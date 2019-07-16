@@ -8,7 +8,8 @@ import {
   UPDATE_USER,
   SHOW_MESSAGE,
   FORM_ERROR,
-  CLEAR_FORM_ERROR
+  CLEAR_FORM_ERROR,
+  CHANGE_PROFILE_PIC
 } from '../constants';
 
 function* getUser({ path, params }) {
@@ -41,7 +42,24 @@ function* updateUser({ path, payload, params }) {
   }
 }
 
+function* changeProfilePic({ path, payload, params }) {
+  try {
+    const { data, message } = yield apply(client, client.post, [
+      path,
+      params,
+      payload
+    ]);
+    yield put({ type: GET_USER_SUCCESS, data });
+    yield put({ type: SHOW_MESSAGE, message });
+    return;
+  } catch ({ error }) {
+    console.error(error);
+    return;
+  }
+}
+
 export function* apiSaga() {
   yield takeEvery(GET_USER, getUser);
   yield takeEvery(UPDATE_USER, updateUser);
+  yield takeEvery(CHANGE_PROFILE_PIC, changeProfilePic);
 }

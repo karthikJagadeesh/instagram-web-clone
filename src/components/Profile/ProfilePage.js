@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 import Button from '@material-ui/core/Button';
@@ -12,7 +12,8 @@ import Settings from '@material-ui/icons/Settings';
 
 import { makeStyles } from '@material-ui/core/styles';
 
-import { ProfilePicture } from './utils';
+import { ChangeProfilePicDialog, ProfilePicture } from './utils';
+import { useLoader } from '../utils';
 
 const userNameSection = {
   display: 'grid',
@@ -217,12 +218,34 @@ const useProfilePageStyles = makeStyles({
 
 function ProfilePage({ user, match: { path } }) {
   const classes = useProfilePageStyles();
+  const [showDialog, toggleDialog] = useState(false);
+  const { loading, setLoading } = useLoader();
+  const inputRef = useRef();
+
+  const profilePictureLargeProps = {
+    user,
+    onImageClick: () => toggleDialog(true),
+    loading,
+    setLoading,
+    inputRef
+  };
+  const profilePictureSmallProps = {
+    size: 77,
+    ...profilePictureLargeProps
+  };
+  const changeProfilePicDialogProps = {
+    id: user.id,
+    onClose: () => toggleDialog(false),
+    loading,
+    setLoading,
+    inputRef
+  };
 
   return (
     <>
       <Hidden xsDown>
         <Card className={classes.cardLarge}>
-          <ProfilePicture />
+          <ProfilePicture {...profilePictureLargeProps} />
           <CardContent className={classes.cardContentLarge}>
             <ProfileNameSection path={path} user={user} />
             <PostCountSection user={user} />
@@ -234,7 +257,7 @@ function ProfilePage({ user, match: { path } }) {
         <Card className={classes.cardSmall}>
           <CardContent>
             <section className={classes.sectionSmall}>
-              <ProfilePicture size={77} />
+              <ProfilePicture {...profilePictureSmallProps} />
               <ProfileNameSection user={user} path={path} />
             </section>
             <NameBioSection user={user} />
@@ -242,6 +265,9 @@ function ProfilePage({ user, match: { path } }) {
           <PostCountSection user={user} />
         </Card>
       </Hidden>
+      {showDialog && (
+        <ChangeProfilePicDialog {...changeProfilePicDialogProps} />
+      )}
     </>
   );
 }

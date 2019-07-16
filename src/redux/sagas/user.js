@@ -28,6 +28,7 @@ function* logIn({ data, path }) {
   try {
     const { message, token, userInfo } = yield apply(client, client.post, [
       path,
+      '',
       data
     ]);
     yield put({ type: SHOW_MESSAGE, message });
@@ -43,7 +44,7 @@ function* logIn({ data, path }) {
 
 function* signUp({ data, path }) {
   try {
-    const response = yield apply(client, client.post, [path, data]);
+    const response = yield apply(client, client.post, [path, '', data]);
     yield put({ type: SHOW_MESSAGE, message: response.message });
     yield put(push('/account/login'));
     return response;

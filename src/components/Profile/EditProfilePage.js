@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useForm, useField } from 'react-final-form-hooks';
 
@@ -18,7 +18,7 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { userActions } from '../../redux/actions/api';
 
-import { ProfilePicture } from './utils';
+import { ProfilePicture, ChangeProfilePicDialog } from './utils';
 import { ErrorText, Loader, useLoader } from '../utils';
 
 const sectionItem = {
@@ -80,25 +80,62 @@ const usePictureSectionItemStyles = makeStyles(theme => ({
 
   pictureSectionItem: {
     ...sectionItem,
+    placeItems: 'center end',
     [theme.breakpoints.down('xs')]: {
       gridGap: 20,
       gridTemplateColumns: 'minmax(auto, 38px) minmax(auto, 340px)'
+    }
+  },
+
+  typographyChangePic: {
+    '&:hover': {
+      cursor: 'pointer'
     }
   }
 }));
 
 function PictureSectionItem({ user }) {
   const classes = usePictureSectionItemStyles();
+  const [showDialog, toggleDialog] = useState(false);
+  const { loading, setLoading } = useLoader();
+  const inputRef = useRef();
+
+  const onImageClick = () => toggleDialog(true);
+
+  const profilePictureProps = {
+    size: 38,
+    user,
+    loading,
+    setLoading,
+    onImageClick,
+    inputRef
+  };
+  const typographyProps = {
+    color: 'primary',
+    variant: 'body2',
+    onClick: user.profileImageUrl
+      ? onImageClick
+      : () => inputRef.current.click(),
+    className: classes.typographyChangePic
+  };
+  const changeProfilePicDialogProps = {
+    id: user.id,
+    onClose: () => toggleDialog(false),
+    loading,
+    setLoading,
+    inputRef
+  };
 
   return (
     <div className={classes.pictureSectionItem}>
-      <ProfilePicture size={38} />
+      <ProfilePicture {...profilePictureProps} />
       <div className={classes.justifySelfStart}>
         <Typography className={classes.typography}>{user.userName}</Typography>
-        <Typography color="primary" variant="body2">
-          Change Profile Photo
-        </Typography>
+        <Typography {...typographyProps}>Change Profile Photo</Typography>
       </div>
+      {showDialog && (
+        <ChangeProfilePicDialog {...changeProfilePicDialogProps} />
+      )}
     </div>
   );
 }
