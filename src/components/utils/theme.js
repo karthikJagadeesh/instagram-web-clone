@@ -7,7 +7,7 @@ const theme = createMuiTheme({
   typography: {
     useNextVariants: true,
     fontFamily:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", Helvetica, Arial, sans-serif'
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", Helvetica, Arial, sans-serif, "insta-font"'
   },
 
   palette: {

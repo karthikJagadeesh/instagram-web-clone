@@ -1,0 +1,7 @@
+@font-face {
+  font-family: 'insta-font';
+  src: url('insta-font-webfont.woff2') format('woff2'),
+    url('insta-font-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}

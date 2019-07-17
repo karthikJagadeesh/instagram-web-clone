@@ -16,7 +16,12 @@
       "dest": "/static/$1"
     },
     { "src": "/favicon.ico", "dest": "/favicon.ico" },
-    { "src": "/insta-font.ttf", "dest": "/insta-font.ttf" },
+    {
+      "src": "/insta-font-stylesheet.css",
+      "dest": "/insta-font-stylesheet.css"
+    },
+    { "src": "/insta-font-webfont.woff", "dest": "/insta-font-webfont.woff" },
+    { "src": "/insta-font-webfont.woff2", "dest": "/insta-font-webfont.woff2" },
     { "src": "/asset-manifest.json", "dest": "/asset-manifest.json" },
     { "src": "/manifest.json", "dest": "/manifest.json" },
     { "src": "/precache-manifest.(.*)", "dest": "/precache-manifest.$1" },

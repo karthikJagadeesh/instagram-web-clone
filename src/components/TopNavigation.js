@@ -140,7 +140,12 @@ const useTitleStyles = makeStyles(theme => ({
     fontSize: 34,
     lineHeight: 'unset',
     letterSpacing: 1,
+    position: 'absolute',
+    top: 17,
     ...commonBreakpoints(theme)
+  },
+  link: {
+    width: 111
   },
 
   wrapper: {
@@ -162,10 +167,8 @@ function Title() {
         </div>
       </Link>
       <div className={classes.separator} />
-      <Link to="/">
-        <div>
-          <Typography className={classes.typography}>Instaclone</Typography>
-        </div>
+      <Link to="/" className={classes.link}>
+        <Typography className={classes.typography}>Instaclone</Typography>
       </Link>
     </div>
   );
