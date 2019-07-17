@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import Divider from '@material-ui/core/Divider';
+import Hidden from '@material-ui/core/Hidden';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
@@ -8,6 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 
 import IconsSpriteSheet from '../../images/icons-spritesheet.png';
+import IconsSpriteSheet2 from '../../images/icons-spritesheet2.png';
 
 const commonIconProps = {
   backgroundImage: `url(${IconsSpriteSheet})`,
@@ -35,7 +37,8 @@ const useSavedPostsStyles = makeStyles({
     ...commonIconProps,
     height: 62,
     width: 62,
-    backgroundPosition: '-196px -291px'
+    backgroundSize: '410px 396px',
+    backgroundPosition: '-189px -273px'
   }
 });
 
@@ -71,7 +74,8 @@ const useProfilePostsStyles = makeStyles({
 
   uploadPhotoIcon: {
     ...commonIconProps,
-    backgroundPosition: '-394px -0px',
+    backgroundSize: '410px 396px',
+    backgroundPosition: '0px -273px',
     height: 62,
     width: 62
   }
@@ -90,36 +94,74 @@ function ProfilePosts() {
   );
 }
 
-const useProfilePostTabsStyles = makeStyles({
-  section: {
-    marginTop: 24
-  },
-
-  tabsIndicator: {
-    top: 0,
-    backgroundColor: '#000000'
-  },
-  tabRoot: {
-    margin: '0px 20px',
-    opacity: 0.5
-  },
-  tabLabelIcon: {
-    minHeight: 'unset'
-  },
-  tabWrapper: {
-    flexDirection: 'row'
-  },
-
-  postsIcon: {
+const useProfilePostTabsStyles = makeStyles(theme => {
+  const postsIconSmallGrey = {
     ...commonIconProps,
-    backgroundPosition: '-50px -425px',
-    width: 12
-  },
-  savedIcon: {
+    backgroundImage: `url(${IconsSpriteSheet2})`,
+    backgroundPosition: '-331px -199px',
+    backgroundSize: '355px 344px',
+    height: 24,
+    width: 24
+  };
+  const savedIconSmallGrey = {
     ...commonIconProps,
-    backgroundPosition: '-90px -425px',
-    width: 10
-  }
+    backgroundImage: `url(${IconsSpriteSheet2})`,
+    backgroundPosition: '-50px -320px',
+    backgroundSize: '355px 344px',
+    height: 24,
+    width: 24
+  };
+
+  return {
+    section: {
+      [theme.breakpoints.up('sm')]: {
+        marginTop: 24
+      }
+    },
+
+    tabsIndicator: {
+      [theme.breakpoints.down('xs')]: {
+        display: 'none'
+      },
+      top: 0,
+      backgroundColor: '#000000'
+    },
+    tabRoot: {
+      margin: '0px 20px',
+      opacity: 0.5
+    },
+    tabLabelIcon: {
+      minHeight: 'unset'
+    },
+    tabWrapper: {
+      flexDirection: 'row'
+    },
+
+    postsIconLarge: {
+      ...commonIconProps,
+      backgroundPosition: '-189px -366px',
+      backgroundSize: '410px 396px',
+      width: 12
+    },
+    savedIconLarge: {
+      ...commonIconProps,
+      backgroundSize: '410px 396px',
+      backgroundPosition: '-401px 0',
+      width: 10
+    },
+
+    postsIconSmall: postsIconSmallGrey,
+    postsIconSmallBlue: {
+      ...postsIconSmallGrey,
+      backgroundPosition: '-331px -174px'
+    },
+
+    savedIconSmall: savedIconSmallGrey,
+    savedIconSmallBlue: {
+      ...savedIconSmallGrey,
+      backgroundPosition: '0px -320px'
+    }
+  };
 });
 
 export default function ProfilePostTabs() {
@@ -132,8 +174,8 @@ export default function ProfilePostTabs() {
     centered: true,
     classes: { indicator: classes.tabsIndicator }
   };
-  const postsTabProps = {
-    icon: <span className={classes.postsIcon} />,
+  const postsTabLargeProps = {
+    icon: <span className={classes.postsIconLarge} />,
     label: 'POSTS',
     classes: {
       root: classes.tabRoot,
@@ -141,20 +183,58 @@ export default function ProfilePostTabs() {
       wrapper: classes.tabWrapper
     }
   };
-  const savedTabProps = {
-    icon: <span className={classes.savedIcon} />,
+  const savedTabLargeProps = {
+    icon: <span className={classes.savedIconLarge} />,
     label: 'SAVED',
-    classes: postsTabProps.classes
+    classes: postsTabLargeProps.classes
+  };
+
+  const postsTabSmallProps = {
+    icon: (
+      <span
+        className={
+          value === 0 ? classes.postsIconSmallBlue : classes.postsIconSmall
+        }
+      />
+    ),
+    classes: {
+      root: classes.tabRoot
+    }
+  };
+  const savedTabSmallProps = {
+    icon: (
+      <span
+        className={
+          value === 1 ? classes.savedIconSmallBlue : classes.savedIconSmall
+        }
+      />
+    ),
+    classes: {
+      root: classes.tabRoot
+    }
   };
 
   return (
     <>
       <section className={classes.section}>
-        <Divider />
-        <Tabs {...tabsProps}>
-          <Tab {...postsTabProps} />
-          <Tab {...savedTabProps} />
-        </Tabs>
+        <Hidden xsDown>
+          <Divider />
+        </Hidden>
+        <Hidden xsDown>
+          <Tabs {...tabsProps}>
+            <Tab {...postsTabLargeProps} />
+            <Tab {...savedTabLargeProps} />
+          </Tabs>
+        </Hidden>
+        <Hidden smUp>
+          <Tabs {...tabsProps}>
+            <Tab {...postsTabSmallProps} />
+            <Tab {...savedTabSmallProps} />
+          </Tabs>
+        </Hidden>
+        <Hidden smUp>
+          <Divider />
+        </Hidden>
         {value === 0 && <ProfilePosts />}
         {value === 1 && <SavedPosts />}
       </section>
