@@ -5,6 +5,7 @@ import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Divider from '@material-ui/core/Divider';
+import Zoom from '@material-ui/core/Zoom';
 
 import PersonIcon from '@material-ui/icons/Person';
 
@@ -53,7 +54,8 @@ export function ChangeProfilePicDialog({ id, onClose, setLoading, inputRef }) {
       scrollPaper: classes.dialogScrollPaper,
       paper: classes.dialogPaper
     },
-    onClose
+    onClose,
+    TransitionComponent: Zoom
   };
   const buttonProps = {
     color: 'primary',

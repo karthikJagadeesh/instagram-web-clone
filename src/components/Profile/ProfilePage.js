@@ -1,19 +1,104 @@
 import React, { useState, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import Divider from '@material-ui/core/Divider';
 import Hidden from '@material-ui/core/Hidden';
 import Typography from '@material-ui/core/Typography';
+import Zoom from '@material-ui/core/Zoom';
 
 import Settings from '@material-ui/icons/Settings';
 
 import { makeStyles } from '@material-ui/core/styles';
 
+import { logOutAction } from '../../redux/actions/user';
+
 import { ChangeProfilePicDialog, ProfilePicture } from './utils';
 import { useLoader } from '../utils';
+
+const useOptionsItemStyles = makeStyles({
+  button: {
+    padding: '12px 8px'
+  }
+});
+
+function OptionsItem({ onClick, text }) {
+  const classes = useOptionsItemStyles();
+
+  return (
+    <>
+      <Button className={classes.button} onClick={onClick}>
+        {text}
+      </Button>
+      <Divider />
+    </>
+  );
+}
+
+const useOptionsMenuStyles = makeStyles({
+  dialogScrollPaper: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(auto, 480px)',
+    borderRadius: '10%'
+  },
+  dialogPaper: {
+    borderRadius: 12
+  },
+  dialogTitle: {
+    textAlign: 'center'
+  }
+});
+function OptionsMenu({ onClose }) {
+  const classes = useOptionsMenuStyles();
+  const [showLogOutMessage, toggleLogOutMessage] = useState(false);
+  const dispatch = useDispatch();
+
+  const dialogProps = {
+    open: true,
+    classes: {
+      scrollPaper: classes.dialogScrollPaper,
+      paper: classes.dialogPaper
+    },
+    onClose: showLogOutMessage ? undefined : onClose,
+    TransitionComponent: Zoom
+  };
+
+  const handleLogOutClick = () => {
+    toggleLogOutMessage(true);
+    dispatch(logOutAction());
+  };
+
+  const logOutMessage = (
+    <DialogTitle className={classes.dialogTitle}>
+      Logging Out
+      <Typography color="textSecondary">
+        You need to log back in to continue using.
+      </Typography>
+    </DialogTitle>
+  );
+
+  return (
+    <Dialog {...dialogProps}>
+      {showLogOutMessage && logOutMessage}
+      {!showLogOutMessage && (
+        <>
+          <OptionsItem text="Change Password" />
+          <OptionsItem text="Nametag" />
+          <OptionsItem text="Authorized Apps" />
+          <OptionsItem text="Notifications" />
+          <OptionsItem text="Privacy and Security" />
+          <OptionsItem text="Log Out" onClick={handleLogOutClick} />
+          <OptionsItem text="Cancel" onClick={onClose} />
+        </>
+      )}
+    </Dialog>
+  );
+}
 
 const userNameSection = {
   display: 'grid',
@@ -51,7 +136,11 @@ const useProfileNameSectionStyles = makeStyles({
   }
 });
 
-function ProfileNameSection({ user: { userName }, path }) {
+function ProfileNameSection({
+  user: { userName },
+  path,
+  handleOptionsMenuClick
+}) {
   const classes = useProfileNameSectionStyles();
 
   return (
@@ -64,7 +153,10 @@ function ProfileNameSection({ user: { userName }, path }) {
               Edit Profile
             </Button>
           </Link>
-          <div className={classes.settingsWrapper}>
+          <div
+            className={classes.settingsWrapper}
+            onClick={handleOptionsMenuClick(true)}
+          >
             <Settings className={classes.settings} />
           </div>
         </section>
@@ -73,7 +165,10 @@ function ProfileNameSection({ user: { userName }, path }) {
         <section>
           <div className={classes.userNameDivSmall}>
             <Typography className={classes.userName}>{userName}</Typography>
-            <div className={classes.settingsWrapper}>
+            <div
+              className={classes.settingsWrapper}
+              onClick={handleOptionsMenuClick(true)}
+            >
               <Settings className={classes.settings} />
             </div>
           </div>
@@ -219,8 +314,11 @@ const useProfilePageStyles = makeStyles({
 function ProfilePage({ user, match: { path } }) {
   const classes = useProfilePageStyles();
   const [showDialog, toggleDialog] = useState(false);
+  const [showOptionsMenu, toggleOptionsMenu] = useState(false);
   const { loading, setLoading } = useLoader();
   const inputRef = useRef();
+
+  const handleOptionsMenuClick = bool => () => toggleOptionsMenu(bool);
 
   const profilePictureLargeProps = {
     user,
@@ -240,6 +338,11 @@ function ProfilePage({ user, match: { path } }) {
     setLoading,
     inputRef
   };
+  const profileNameSectionProps = {
+    handleOptionsMenuClick,
+    user,
+    path
+  };
 
   return (
     <>
@@ -247,7 +350,7 @@ function ProfilePage({ user, match: { path } }) {
         <Card className={classes.cardLarge}>
           <ProfilePicture {...profilePictureLargeProps} />
           <CardContent className={classes.cardContentLarge}>
-            <ProfileNameSection path={path} user={user} />
+            <ProfileNameSection {...profileNameSectionProps} />
             <PostCountSection user={user} />
             <NameBioSection user={user} />
           </CardContent>
@@ -258,7 +361,7 @@ function ProfilePage({ user, match: { path } }) {
           <CardContent>
             <section className={classes.sectionSmall}>
               <ProfilePicture {...profilePictureSmallProps} />
-              <ProfileNameSection user={user} path={path} />
+              <ProfileNameSection {...profileNameSectionProps} />
             </section>
             <NameBioSection user={user} />
           </CardContent>
@@ -267,6 +370,9 @@ function ProfilePage({ user, match: { path } }) {
       </Hidden>
       {showDialog && (
         <ChangeProfilePicDialog {...changeProfilePicDialogProps} />
+      )}
+      {showOptionsMenu && (
+        <OptionsMenu onClose={handleOptionsMenuClick(false)} />
       )}
     </>
   );

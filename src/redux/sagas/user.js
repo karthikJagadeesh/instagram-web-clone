@@ -1,4 +1,4 @@
-import { apply, put, takeEvery } from 'redux-saga/effects';
+import { apply, delay, put, takeEvery } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 
 import client from '../singletons/client';
@@ -10,7 +10,8 @@ import {
   LOG_IN,
   SHOW_MESSAGE,
   LOCATION_CHANGE,
-  LOG_IN_SUCCESS
+  LOG_IN_SUCCESS,
+  LOG_OUT
 } from '../constants';
 
 function* setAuthToken({ token, userInfo: { id, userName } }) {
@@ -54,10 +55,18 @@ function* signUp({ data, path }) {
   }
 }
 
+function* logOut() {
+  yield localStorage.removeItem('instaInfo');
+  yield delay(1000);
+  yield put(push('/account/login'));
+  return;
+}
+
 export function* userSaga() {
   yield takeEvery(SIGN_UP, signUp);
   yield takeEvery(SET_AUTH_TOKEN, setAuthToken);
   yield takeEvery(LOG_IN, logIn);
+  yield takeEvery(LOG_OUT, logOut);
 
   yield takeEvery(LOCATION_CHANGE, function*() {
     yield put({ type: CLEAR_FORM_ERROR });
