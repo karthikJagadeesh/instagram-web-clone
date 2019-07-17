@@ -68,6 +68,15 @@ const theme = createMuiTheme({
           margin: 0
         }
       }
+    },
+
+    MuiTab: {
+      labelIcon: {
+        '& $wrapper > *:first-child': {
+          marginBottom: 'unset',
+          marginRight: 6
+        }
+      }
     }
   }
 });

@@ -18,6 +18,8 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { logOutAction } from '../../redux/actions/user';
 
+import ProfilePostsTab from './ProfilePosts';
+
 import { ChangeProfilePicDialog, ProfilePicture } from './utils';
 import { useLoader } from '../utils';
 
@@ -374,6 +376,7 @@ function ProfilePage({ user, match: { path } }) {
       {showOptionsMenu && (
         <OptionsMenu onClose={handleOptionsMenuClick(false)} />
       )}
+      <ProfilePostsTab />
     </>
   );
 }
