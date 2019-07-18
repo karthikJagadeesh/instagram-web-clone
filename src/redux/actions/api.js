@@ -1,4 +1,9 @@
-import { CHANGE_PROFILE_PIC, GET_USER, UPDATE_USER } from '../constants';
+import {
+  CHANGE_PROFILE_PIC,
+  GET_USER,
+  UPDATE_USER,
+  CHANGE_PASSWORD
+} from '../constants';
 
 export const userActions = {
   get: params => ({ type: GET_USER, path: '/users', params }),
@@ -7,6 +12,11 @@ export const userActions = {
     path: '/users',
     payload,
     params
+  }),
+  changePassword: payload => ({
+    type: CHANGE_PASSWORD,
+    path: '/users/change/password',
+    payload
   })
 };
 

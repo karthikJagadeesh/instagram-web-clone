@@ -1,7 +1,11 @@
 class InstaError extends Error {
   constructor(error) {
-    super('An error occurred in the API');
-    this.error = error;
+    super('An error occurred in API');
+    if (error === 'unknown endpoint') {
+      this.error = 'An error occured in API';
+    } else {
+      this.error = error;
+    }
   }
 }
 
@@ -10,7 +14,10 @@ class Client {
     this.baseURL = 'https://instaclone-api.now.sh';
     this.headers = {
       Authorization: null,
-      Accept: 'application/json'
+      Accept: 'application/json',
+      'x-instaclone-userId':
+        localStorage.getItem('instaInfo') &&
+        JSON.parse(localStorage.getItem('instaInfo')).userId
     };
     this.client = ({ method, url, payload }) => {
       let body;

@@ -21,6 +21,11 @@ function ProfileRoutes(props) {
         component={withProps(EditProfilePage)}
       />
       <Route
+        exact
+        path={`/${userName}/change-password`}
+        component={withProps(EditProfilePage)}
+      />
+      <Route
         component={routeProps => <ProfilePage {...routeProps} {...props} />}
       />
     </Switch>

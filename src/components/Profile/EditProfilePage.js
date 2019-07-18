@@ -35,6 +35,148 @@ const typography = {
 const justifySelfStart = {
   justifySelf: 'start'
 };
+const form = {
+  display: 'grid'
+};
+
+const useChangePasswordStyles = makeStyles(theme => ({
+  form,
+
+  section: {
+    background: '#ffffff',
+    display: 'grid',
+    justifyContent: 'start',
+    padding: 30
+  },
+  sectionItem: {
+    ...sectionItem,
+    [theme.breakpoints.down('xs')]: {
+      display: 'block'
+    }
+  },
+
+  justifySelfStart,
+
+  userNameDiv: {
+    ...sectionItem,
+    placeItems: 'center end',
+    marginBottom: 30,
+    [theme.breakpoints.down('xs')]: {
+      gridGap: 20,
+      gridTemplateColumns: 'minmax(auto, 38px) minmax(auto, 340px)'
+    }
+  }
+}));
+
+function ChangePassword({ user }) {
+  const classes = useChangePasswordStyles();
+  const dispatch = useDispatch();
+  const { loading, setLoading, formError } = useLoader();
+
+  const onSubmit = values => {
+    setLoading(true);
+    dispatch(userActions.changePassword(values));
+  };
+  const validate = ({ newPassword, confirmPassword }) => {
+    const errors = {};
+    if (newPassword && newPassword.length < 6) {
+      errors.newPassword = 'Password should be 6 or more characters.';
+    }
+    if (confirmPassword && confirmPassword !== newPassword) {
+      errors.confirmPassword = 'Please make sure both passwords match.';
+    }
+    return errors;
+  };
+
+  const { form, handleSubmit, submitting, submitFailed, errors } = useForm({
+    onSubmit,
+    validate
+  });
+
+  const oldPassword = useField('oldPassword', form);
+  const newPassword = useField('newPassword', form);
+  const confirmPassword = useField('confirmPassword', form);
+
+  const disabled =
+    oldPassword.meta.pristine ||
+    newPassword.meta.pristine ||
+    confirmPassword.meta.pristine ||
+    !oldPassword.input.value ||
+    !newPassword.input.value ||
+    !confirmPassword.input.value ||
+    submitting ||
+    loading;
+  const buttonProps = {
+    disabled,
+    type: 'submit',
+    variant: 'contained',
+    color: 'primary',
+    className: classes.justifySelfStart
+  };
+
+  const commonProps = {
+    type: 'password',
+    autoComplete: 'new-password'
+  };
+  const currentPasswordProps = {
+    ...commonProps,
+    text: 'Old Password',
+    formItem: oldPassword,
+    autoComplete: 'current-password'
+  };
+  const newPasswordProps = {
+    ...commonProps,
+    text: 'New Password',
+    formItem: newPassword
+  };
+  const confirmPasswordProps = {
+    ...commonProps,
+    text: 'Confirm New Password',
+    formItem: confirmPassword
+  };
+
+  return (
+    <section className={classes.section}>
+      <div className={classes.userNameDiv}>
+        <ProfilePicture user={user} size={38} />
+        <Typography variant="h6" className={classes.justifySelfStart}>
+          {user.userName}
+        </Typography>
+      </div>
+      <form onSubmit={handleSubmit} className={classes.form}>
+        <input type="text" autoComplete="username" hidden />
+        <SectionItem {...currentPasswordProps} />
+        <SectionItem {...newPasswordProps} />
+        <SectionItem {...confirmPasswordProps} />
+        <div className={classes.sectionItem}>
+          <div />
+          <Button {...buttonProps}>
+            {loading && <Loader />}Change Password
+          </Button>
+        </div>
+      </form>
+      <div className={classes.sectionItem}>
+        <div />
+        <div className={classes.justifySelfStart}>
+          {submitFailed && (
+            <ErrorText
+              align="left"
+              text={Object.values(errors)[0]}
+              className={classes.justifySelfStart}
+            />
+          )}
+          {formError && (
+            <ErrorText
+              align="left"
+              text={formError}
+              className={classes.justifySelfStart}
+            />
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 const useSectionItemStyles = makeStyles(theme => ({
   typography,
@@ -47,10 +189,13 @@ const useSectionItemStyles = makeStyles(theme => ({
 
   textFieldInput: {
     padding: 10
+  },
+  textField: {
+    alignSelf: 'center'
   }
 }));
 
-function SectionItem({ text, formItem }) {
+function SectionItem({ text, formItem, type = 'text', autoComplete = '' }) {
   const classes = useSectionItemStyles();
 
   const textFieldProps = {
@@ -58,16 +203,25 @@ function SectionItem({ text, formItem }) {
     error: formItem.meta.error && formItem.meta.submitFailed,
     variant: 'outlined',
     fullWidth: true,
-    type: formItem.input.name === 'email' ? 'email' : 'text',
+    type,
     inputProps: {
       className: classes.textFieldInput
-    }
+    },
+    className: classes.textField,
+    autoComplete
   };
 
   return (
     <div className={classes.sectionItem}>
       <aside>
-        <Typography className={classes.typography}>{text}</Typography>
+        <Hidden xsDown>
+          <Typography className={classes.typography} align="right">
+            {text}
+          </Typography>
+        </Hidden>
+        <Hidden smUp>
+          <Typography className={classes.typography}>{text}</Typography>
+        </Hidden>
       </aside>
       <TextField {...textFieldProps} />
     </div>
@@ -154,9 +308,7 @@ const useEditProfileStyles = makeStyles(theme => ({
     }
   },
 
-  form: {
-    display: 'grid'
-  },
+  form,
 
   typography,
   justifySelfStart
@@ -263,7 +415,7 @@ function EditProfile({ user }) {
           </Typography>
         </div>
 
-        <SectionItem text="Email" formItem={email} />
+        <SectionItem text="Email" formItem={email} type="email" />
         <SectionItem text="Phone Number" formItem={phoneNumber} />
 
         <div className={classes.sectionItem}>
@@ -273,20 +425,22 @@ function EditProfile({ user }) {
       </form>
       <div className={classes.sectionItem}>
         <div />
-        {submitFailed && (
-          <ErrorText
-            align="left"
-            text={Object.values(errors)[0]}
-            className={classes.justifySelfStart}
-          />
-        )}
-        {formError && (
-          <ErrorText
-            align="left"
-            text={formError}
-            className={classes.justifySelfStart}
-          />
-        )}
+        <div className={classes.justifySelfStart}>
+          {submitFailed && (
+            <ErrorText
+              align="left"
+              text={Object.values(errors)[0]}
+              className={classes.justifySelfStart}
+            />
+          )}
+          {formError && (
+            <ErrorText
+              align="left"
+              text={formError}
+              className={classes.justifySelfStart}
+            />
+          )}
+        </div>
       </div>
     </section>
   );
@@ -345,12 +499,43 @@ const useEditProfilePageStyles = makeStyles(theme => ({
   }
 }));
 
-function EditProfilePage({ user }) {
+function EditProfilePage({
+  user,
+  location: { pathname },
+  history,
+  match: { path }
+}) {
   const classes = useEditProfilePageStyles();
-  const [selected, setSelected] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+  const handleListClick = index => () => {
+    switch (index) {
+      case 0:
+        history.push(`${path}/edit`);
+        break;
+
+      case 1: {
+        history.push(`${path}/change-password`);
+        break;
+      }
+
+      default:
+        break;
+    }
+  };
+  const handleSelected = index => {
+    switch (index) {
+      case 0:
+        return pathname.includes('edit');
+
+      case 1:
+        return pathname.includes('change-password');
+
+      default:
+        break;
+    }
+  };
 
   const options = [
     'Edit Profile',
@@ -367,8 +552,8 @@ function EditProfilePage({ user }) {
         const listItemProps = {
           button: true,
           key: text,
-          selected: index === selected,
-          onClick: () => setSelected(index),
+          selected: handleSelected(index),
+          onClick: handleListClick(index),
           classes: {
             selected: classes.listItemSelected,
             button: classes.listItemButton
@@ -424,7 +609,8 @@ function EditProfilePage({ user }) {
         </Hidden>
       </nav>
       <main>
-        <EditProfile user={user} />
+        {pathname.includes('edit') && <EditProfile user={user} />}
+        {pathname.includes('change-password') && <ChangePassword user={user} />}
       </main>
     </section>
   );

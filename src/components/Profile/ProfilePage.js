@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import Button from '@material-ui/core/Button';
@@ -55,10 +55,11 @@ const useOptionsMenuStyles = makeStyles({
     textAlign: 'center'
   }
 });
-function OptionsMenu({ onClose }) {
+function OptionsMenu({ onClose, history }) {
   const classes = useOptionsMenuStyles();
   const [showLogOutMessage, toggleLogOutMessage] = useState(false);
   const dispatch = useDispatch();
+  const pathName = useSelector(({ router }) => router.location.pathname);
 
   const dialogProps = {
     open: true,
@@ -73,6 +74,9 @@ function OptionsMenu({ onClose }) {
   const handleLogOutClick = () => {
     toggleLogOutMessage(true);
     dispatch(logOutAction());
+  };
+  const handleChangePasswordClick = () => {
+    history.push(`${pathName}/change-password`);
   };
 
   const logOutMessage = (
@@ -89,7 +93,10 @@ function OptionsMenu({ onClose }) {
       {showLogOutMessage && logOutMessage}
       {!showLogOutMessage && (
         <>
-          <OptionsItem text="Change Password" />
+          <OptionsItem
+            text="Change Password"
+            onClick={handleChangePasswordClick}
+          />
           <OptionsItem text="Nametag" />
           <OptionsItem text="Authorized Apps" />
           <OptionsItem text="Notifications" />
@@ -313,7 +320,7 @@ const useProfilePageStyles = makeStyles({
   }
 });
 
-function ProfilePage({ user, match: { path } }) {
+function ProfilePage({ user, history, match: { path } }) {
   const classes = useProfilePageStyles();
   const [showDialog, toggleDialog] = useState(false);
   const [showOptionsMenu, toggleOptionsMenu] = useState(false);
@@ -374,7 +381,10 @@ function ProfilePage({ user, match: { path } }) {
         <ChangeProfilePicDialog {...changeProfilePicDialogProps} />
       )}
       {showOptionsMenu && (
-        <OptionsMenu onClose={handleOptionsMenuClick(false)} />
+        <OptionsMenu
+          history={history}
+          onClose={handleOptionsMenuClick(false)}
+        />
       )}
       <ProfilePostsTab />
     </>
