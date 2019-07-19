@@ -27,8 +27,7 @@ const useChangeProfilePicDialogStyles = makeStyles(theme => ({
 
   dialogScrollPaper: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(auto, 480px)',
-    borderRadius: '10%'
+    gridTemplateColumns: 'minmax(auto, 480px)'
   },
   dialogPaper: {
     borderRadius: 12
@@ -88,13 +87,13 @@ export function ChangeProfilePicDialog({ id, onClose, setLoading, inputRef }) {
 const useProfilePictureStyles = makeStyles({
   person: {
     color: '#ffffff',
-    height: ({ size }) => size || 150,
-    width: ({ size }) => size || 150
+    height: ({ size = 150 }) => size,
+    width: ({ size = 150 }) => size
   },
   personWrapper: {
     background: '#DBDBDB',
-    width: ({ size }) => size || 150,
-    height: ({ size }) => size || 150,
+    width: ({ size = 150 }) => size,
+    height: ({ size = 150 }) => size,
     borderRadius: '50%',
     display: 'grid',
     position: 'relative',
@@ -109,8 +108,8 @@ const useProfilePictureStyles = makeStyles({
   },
 
   img: {
-    height: ({ size }) => size || 150,
-    width: ({ size }) => size || 150,
+    height: ({ size = 150 }) => size,
+    width: ({ size = 150 }) => size,
     borderRadius: '50%'
   }
 });

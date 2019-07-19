@@ -45,8 +45,7 @@ function OptionsItem({ onClick, text }) {
 const useOptionsMenuStyles = makeStyles({
   dialogScrollPaper: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(auto, 480px)',
-    borderRadius: '10%'
+    gridTemplateColumns: 'minmax(auto, 480px)'
   },
   dialogPaper: {
     borderRadius: 12

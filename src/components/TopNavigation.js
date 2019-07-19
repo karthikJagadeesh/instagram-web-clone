@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import AppBar from '@material-ui/core/AppBar';
@@ -11,7 +12,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import IconsSpriteSheet2 from '../images/icons-spritesheet2.png';
 import IconsSpriteSheet1 from '../images/icons-spritesheet.png';
 
-const userStyles = makeStyles(() => {
+import { uploadPostDialogActions } from '../redux/actions/ui';
+
+import { UploadPostDialog } from './UploadPost';
+
+const userStyles = makeStyles(theme => {
   const common = {
     height: 24,
     width: 24,
@@ -40,7 +45,18 @@ const userStyles = makeStyles(() => {
       backgroundSize: '355px 344px',
       backgroundPosition: '-125px -270px'
     },
+    uploadPost: {
+      ...common,
+      backgroundSize: '355px 344px',
+      backgroundPosition: '-214px -97px',
+      '&:hover': {
+        cursor: 'pointer'
+      }
+    },
     link: {
+      [theme.breakpoints.down('xs')]: {
+        marginLeft: 20
+      },
       marginLeft: 30,
       display: 'grid'
     }
@@ -49,9 +65,36 @@ const userStyles = makeStyles(() => {
 
 function User({ userName }) {
   const classes = userStyles();
+  const inputRef = useRef();
+  const [src, setSrc] = useState('');
+  const dispatch = useDispatch();
+  const showUploadDialog = useSelector(state => state.ui.showUploadDialog);
+
+  const handleFileUpload = ({ target }) => {
+    if (target.files && target.files.length > 0) {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        setSrc(reader.result);
+        dispatch(uploadPostDialogActions.open());
+      });
+      reader.readAsDataURL(target.files[0]);
+    }
+  };
+
+  const inputProps = {
+    ref: inputRef,
+    type: 'file',
+    onChange: handleFileUpload,
+    accept: 'image/jpeg, image/png',
+    hidden: true
+  };
 
   return (
     <div className={classes.wrapper}>
+      <div onClick={() => inputRef.current.click()} className={classes.link}>
+        <input {...inputProps} />
+        <span className={classes.uploadPost} />
+      </div>
       <Link to={`/${userName}`} className={classes.link}>
         <span className={classes.explore} />
       </Link>
@@ -61,6 +104,7 @@ function User({ userName }) {
       <Link to={`/${userName}`} className={classes.link}>
         <span className={classes.profile} />
       </Link>
+      {showUploadDialog && <UploadPostDialog inputRef={inputRef} src={src} />}
     </div>
   );
 }
@@ -85,7 +129,8 @@ const useSearchStyles = makeStyles(theme => ({
   },
   searchIcon: {
     backgroundImage: `url(${IconsSpriteSheet1})`,
-    backgroundPosition: '-437px -344px',
+    backgroundPosition: '-239px -366px',
+    backgroundSize: '410px 396px',
     backgroundRepeat: 'no-repeat',
     height: 10,
     width: 10

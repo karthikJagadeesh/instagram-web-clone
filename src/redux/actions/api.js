@@ -2,7 +2,8 @@ import {
   CHANGE_PROFILE_PIC,
   GET_USER,
   UPDATE_USER,
-  CHANGE_PASSWORD
+  CHANGE_PASSWORD,
+  UPLOAD_POST
 } from '../constants';
 
 export const userActions = {
@@ -28,3 +29,9 @@ export const changeProfilePicAction = ({ params, payload = {} }) => {
     payload
   };
 };
+
+export const uploadPostAction = ({ payload }) => ({
+  type: UPLOAD_POST,
+  path: '/post',
+  payload
+});

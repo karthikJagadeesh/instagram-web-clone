@@ -2,7 +2,9 @@ import {
   FORM_ERROR,
   CLEAR_FORM_ERROR,
   OPEN_SNACKBAR,
-  CLOSE_SNACKBAR
+  CLOSE_SNACKBAR,
+  OPEN_UPLOAD_POST,
+  CLOSE_UPLOAD_POST
 } from '../constants';
 
 const initialState = {
@@ -10,7 +12,8 @@ const initialState = {
   snackbar: {
     open: false,
     message: ''
-  }
+  },
+  showUploadDialog: false
 };
 
 export default function(state = initialState, action) {
@@ -47,6 +50,20 @@ export default function(state = initialState, action) {
           message: ''
         }
       };
+
+    case OPEN_UPLOAD_POST: {
+      return {
+        ...state,
+        showUploadDialog: true
+      };
+    }
+
+    case CLOSE_UPLOAD_POST: {
+      return {
+        ...state,
+        showUploadDialog: false
+      };
+    }
 
     default:
       return state;

@@ -77,6 +77,12 @@ const theme = createMuiTheme({
           marginRight: 6
         }
       }
+    },
+
+    MuiDialog: {
+      paperScrollPaper: {
+        borderRadius: 12
+      }
     }
   }
 });

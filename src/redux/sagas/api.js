@@ -11,7 +11,9 @@ import {
   FORM_ERROR,
   CLEAR_FORM_ERROR,
   CHANGE_PROFILE_PIC,
-  CHANGE_PASSWORD
+  CHANGE_PASSWORD,
+  UPLOAD_POST,
+  CLOSE_UPLOAD_POST
 } from '../constants';
 
 function* getUser({ path, params }) {
@@ -74,9 +76,22 @@ function* changePassword({ path, payload }) {
   }
 }
 
+function* uploadPost({ path, payload }) {
+  try {
+    const { message } = yield apply(client, client.post, [path, '', payload]);
+    yield put({ type: CLOSE_UPLOAD_POST });
+    yield put({ type: SHOW_MESSAGE, message });
+    return;
+  } catch ({ error }) {
+    console.error(error);
+    return;
+  }
+}
+
 export function* apiSaga() {
   yield takeEvery(GET_USER, getUser);
   yield takeEvery(UPDATE_USER, updateUser);
   yield takeEvery(CHANGE_PROFILE_PIC, changeProfilePic);
   yield takeEvery(CHANGE_PASSWORD, changePassword);
+  yield takeEvery(UPLOAD_POST, uploadPost);
 }
