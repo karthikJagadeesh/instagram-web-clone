@@ -14,10 +14,7 @@ class Client {
     this.baseURL = 'https://instaclone-api.now.sh';
     this.headers = {
       Authorization: null,
-      Accept: 'application/json',
-      'x-instaclone-userId':
-        localStorage.getItem('instaInfo') &&
-        JSON.parse(localStorage.getItem('instaInfo')).userId
+      Accept: 'application/json'
     };
     this.client = ({ method, url, payload }) => {
       let body;
@@ -35,9 +32,17 @@ class Client {
         body
       });
     };
+
+    if (localStorage.getItem('instaInfo')) {
+      const secret = JSON.parse(localStorage.getItem('instaInfo'));
+      this.setCustomHeaders(secret);
+    }
   }
 
-  setAuthorization(secret) {
+  setCustomHeaders(secret) {
+    this.headers['x-instaclone-userId'] = JSON.parse(
+      localStorage.getItem('instaInfo')
+    ).userId;
     this.headers.Authorization = `Bearer ${secret}`;
   }
 

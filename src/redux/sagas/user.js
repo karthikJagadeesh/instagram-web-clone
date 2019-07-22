@@ -36,6 +36,7 @@ function* logIn({ data, path }) {
     yield put({ type: SET_AUTH_TOKEN, token, userInfo });
     yield put({ type: LOG_IN_SUCCESS });
     yield put(push('/'));
+    client.setCustomHeaders(token);
     return;
   } catch ({ error }) {
     yield put({ type: FORM_ERROR, error });
