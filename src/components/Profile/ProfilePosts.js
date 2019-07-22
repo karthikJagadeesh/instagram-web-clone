@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Divider from '@material-ui/core/Divider';
 import Hidden from '@material-ui/core/Hidden';
@@ -10,6 +11,8 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import IconsSpriteSheet from '../../images/icons-spritesheet.png';
 import IconsSpriteSheet2 from '../../images/icons-spritesheet2.png';
+
+import { getProfilePostsAction } from '../../redux/actions/api';
 
 const commonIconProps = {
   backgroundImage: `url(${IconsSpriteSheet})`,
@@ -59,7 +62,7 @@ function SavedPosts() {
   );
 }
 
-const useProfilePostsStyles = makeStyles({
+const useProfilePostsStyles = makeStyles(theme => ({
   section: {
     paddingTop: 60
   },
@@ -78,20 +81,68 @@ const useProfilePostsStyles = makeStyles({
     backgroundPosition: '0px -273px',
     height: 62,
     width: 62
+  },
+
+  article: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(auto, 935px)'
+  },
+  postContainer: {
+    [theme.breakpoints.down('sm')]: {
+      gridGap: 2
+    },
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridGap: 20
+  },
+  image: {
+    width: '100%',
+    userSelect: 'none'
   }
-});
+}));
 
 function ProfilePosts() {
   const classes = useProfilePostsStyles();
+  const { user, profilePosts } = useSelector(state => ({
+    user: state.api.user,
+    profilePosts: state.api.profilePosts
+  }));
+  const dispatch = useDispatch();
 
-  return (
-    <section className={classes.section}>
-      <div className={classes.noPicDiv}>
-        <div className={classes.uploadPhotoIcon} />
-        <Typography variant="h4">Upload a Photo</Typography>
-      </div>
-    </section>
-  );
+  useEffect(() => {
+    dispatch(getProfilePostsAction());
+  }, [dispatch]);
+
+  if (user.posts === 0) {
+    return (
+      <section className={classes.section}>
+        <div className={classes.noPicDiv}>
+          <div className={classes.uploadPhotoIcon} />
+          <Typography variant="h4">Upload a Photo</Typography>
+        </div>
+      </section>
+    );
+  }
+
+  if (profilePosts) {
+    return (
+      <article className={classes.article}>
+        <div className={classes.postContainer}>
+          {profilePosts.map(post => (
+            <div key={post.id}>
+              <img
+                src={post.imageUrl}
+                alt="profile-post"
+                className={classes.image}
+              />
+            </div>
+          ))}
+        </div>
+      </article>
+    );
+  }
+
+  return null;
 }
 
 const useProfilePostTabsStyles = makeStyles(theme => {

@@ -58,7 +58,7 @@ function* signUp({ data, path }) {
 function* logOut() {
   yield localStorage.removeItem('instaInfo');
   yield delay(1000);
-  yield put(push('/account/login'));
+  window.location.href = '/';
   return;
 }
 

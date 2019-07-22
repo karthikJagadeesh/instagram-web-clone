@@ -3,7 +3,8 @@ import {
   GET_USER,
   UPDATE_USER,
   CHANGE_PASSWORD,
-  UPLOAD_POST
+  UPLOAD_POST,
+  GET_PROFILE_POSTS
 } from '../constants';
 
 export const userActions = {
@@ -34,4 +35,9 @@ export const uploadPostAction = ({ payload }) => ({
   type: UPLOAD_POST,
   path: '/post',
   payload
+});
+
+export const getProfilePostsAction = () => ({
+  type: GET_PROFILE_POSTS,
+  path: '/profile-posts'
 });

@@ -1,4 +1,4 @@
-import { GET_USER_SUCCESS } from '../constants';
+import { GET_USER_SUCCESS, GET_PROFILE_POSTS_SUCCESS } from '../constants';
 
 export default function(state = {}, action) {
   switch (action.type) {
@@ -6,6 +6,12 @@ export default function(state = {}, action) {
       return {
         ...state,
         user: action.data
+      };
+
+    case GET_PROFILE_POSTS_SUCCESS:
+      return {
+        ...state,
+        profilePosts: action.data
       };
 
     default:

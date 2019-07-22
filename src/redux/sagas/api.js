@@ -13,7 +13,9 @@ import {
   CHANGE_PROFILE_PIC,
   CHANGE_PASSWORD,
   UPLOAD_POST,
-  CLOSE_UPLOAD_POST
+  CLOSE_UPLOAD_POST,
+  GET_PROFILE_POSTS,
+  GET_PROFILE_POSTS_SUCCESS
 } from '../constants';
 
 function* getUser({ path, params }) {
@@ -88,10 +90,22 @@ function* uploadPost({ path, payload }) {
   }
 }
 
+function* getProfilePosts({ path }) {
+  try {
+    const { data } = yield apply(client, client.get, [path, '']);
+    yield put({ type: GET_PROFILE_POSTS_SUCCESS, data });
+    return;
+  } catch ({ error }) {
+    console.error(error);
+    return;
+  }
+}
+
 export function* apiSaga() {
   yield takeEvery(GET_USER, getUser);
   yield takeEvery(UPDATE_USER, updateUser);
   yield takeEvery(CHANGE_PROFILE_PIC, changeProfilePic);
   yield takeEvery(CHANGE_PASSWORD, changePassword);
   yield takeEvery(UPLOAD_POST, uploadPost);
+  yield takeEvery(GET_PROFILE_POSTS, getProfilePosts);
 }
