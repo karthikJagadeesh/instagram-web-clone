@@ -34,7 +34,7 @@ class Client {
     };
 
     if (localStorage.getItem('instaInfo')) {
-      const secret = JSON.parse(localStorage.getItem('instaInfo'));
+      const secret = JSON.parse(localStorage.getItem('instaInfo')).secret;
       this.setCustomHeaders(secret);
     }
   }

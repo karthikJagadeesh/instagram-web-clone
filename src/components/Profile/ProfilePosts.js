@@ -62,6 +62,78 @@ function SavedPosts() {
   );
 }
 
+const useImageWithMetaStyles = makeStyles(theme => ({
+  image: {
+    width: '100%',
+    userSelect: 'none'
+  },
+  imageWrapper: {
+    position: 'relative'
+  },
+  postMeta: {
+    [theme.breakpoints.down('xs')]: {
+      gridAutoFlow: 'row',
+      alignContent: 'space-evenly'
+    },
+    position: 'absolute',
+    display: 'grid',
+    placeItems: 'center',
+    gridAutoFlow: 'column',
+    width: '100%',
+    height: '100%',
+    justifyContent: 'space-evenly',
+    '&:hover': {
+      background: 'rgba(0,0,0,0.6)',
+      cursor: 'pointer',
+      '& > div': {
+        opacity: 1
+      }
+    }
+  },
+  postMetaItems: {
+    color: '#ffffff',
+    display: 'grid',
+    gridAutoFlow: 'column',
+    gridGap: 5,
+    placeItems: 'center',
+    opacity: 0
+  },
+  likes: {
+    ...commonIconProps,
+    backgroundPosition: '-328px -239px',
+    backgroundSize: '355px 344px',
+    height: 16,
+    width: 16
+  },
+  comments: {
+    ...commonIconProps,
+    backgroundPosition: '-327px -203px',
+    backgroundSize: '355px 344px',
+    height: 16,
+    width: 18
+  }
+}));
+
+function ImageWithMeta({ post }) {
+  const classes = useImageWithMetaStyles();
+
+  return (
+    <div className={classes.imageWrapper}>
+      <div className={classes.postMeta}>
+        <div className={classes.postMetaItems}>
+          <span className={classes.likes} />
+          <Typography>{post.likes}</Typography>
+        </div>
+        <div className={classes.postMetaItems}>
+          <span className={classes.comments} />
+          <Typography>{post.comments}</Typography>
+        </div>
+      </div>
+      <img src={post.imageUrl} alt="profile-post" className={classes.image} />
+    </div>
+  );
+}
+
 const useProfilePostsStyles = makeStyles(theme => ({
   section: {
     paddingTop: 60
@@ -94,10 +166,6 @@ const useProfilePostsStyles = makeStyles(theme => ({
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
     gridGap: 20
-  },
-  image: {
-    width: '100%',
-    userSelect: 'none'
   }
 }));
 
@@ -129,13 +197,7 @@ function ProfilePosts() {
       <article className={classes.article}>
         <div className={classes.postContainer}>
           {profilePosts.map(post => (
-            <div key={post.id}>
-              <img
-                src={post.imageUrl}
-                alt="profile-post"
-                className={classes.image}
-              />
-            </div>
+            <ImageWithMeta key={post.id} post={post} />
           ))}
         </div>
       </article>
