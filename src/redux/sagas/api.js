@@ -1,6 +1,8 @@
 import { apply, put, select, takeEvery } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 
+import { userActions } from '../actions/api';
+
 import client from '../singletons/client';
 
 import {
@@ -83,6 +85,8 @@ function* uploadPost({ path, payload }) {
     const { message } = yield apply(client, client.post, [path, '', payload]);
     yield put({ type: CLOSE_UPLOAD_POST });
     yield put({ type: SHOW_MESSAGE, message });
+    const params = yield select(({ api }) => api.user.id);
+    yield put(userActions.get(params));
     return;
   } catch ({ error }) {
     console.error(error);
