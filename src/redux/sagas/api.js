@@ -17,7 +17,11 @@ import {
   UPLOAD_POST,
   CLOSE_UPLOAD_POST,
   GET_PROFILE_POSTS,
-  GET_PROFILE_POSTS_SUCCESS
+  GET_PROFILE_POSTS_SUCCESS,
+  GET_SUGGESTIONS,
+  GET_SUGGESTIONS_SUCCESS,
+  GET_USER_PROFILE,
+  GET_USER_PROFILE_SUCCESS
 } from '../constants';
 
 function* getUser({ path, params }) {
@@ -94,11 +98,32 @@ function* uploadPost({ path, payload }) {
   }
 }
 
-function* getProfilePosts({ path }) {
+function* getProfilePosts({ path, params }) {
   try {
-    const { data } = yield apply(client, client.get, [path, '']);
+    const { data } = yield apply(client, client.get, [path, params]);
     yield put({ type: GET_PROFILE_POSTS_SUCCESS, data });
     return;
+  } catch ({ error }) {
+    console.error(error);
+    return;
+  }
+}
+
+function* getSuggestions({ path }) {
+  try {
+    const { data } = yield apply(client, client.get, [path, '']);
+    yield put({ type: GET_SUGGESTIONS_SUCCESS, data });
+    return;
+  } catch ({ error }) {
+    console.error(error);
+    return;
+  }
+}
+
+function* getUserProfile({ path, params }) {
+  try {
+    const { data, status } = yield apply(client, client.get, [path, params]);
+    yield put({ type: GET_USER_PROFILE_SUCCESS, data, status });
   } catch ({ error }) {
     console.error(error);
     return;
@@ -108,8 +133,14 @@ function* getProfilePosts({ path }) {
 export function* apiSaga() {
   yield takeEvery(GET_USER, getUser);
   yield takeEvery(UPDATE_USER, updateUser);
+
   yield takeEvery(CHANGE_PROFILE_PIC, changeProfilePic);
   yield takeEvery(CHANGE_PASSWORD, changePassword);
+
   yield takeEvery(UPLOAD_POST, uploadPost);
   yield takeEvery(GET_PROFILE_POSTS, getProfilePosts);
+
+  yield takeEvery(GET_SUGGESTIONS, getSuggestions);
+
+  yield takeEvery(GET_USER_PROFILE, getUserProfile);
 }

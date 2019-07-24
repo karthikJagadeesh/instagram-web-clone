@@ -1,16 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
 
-import { userActions } from '../../redux/actions/api';
+import { userActions, getUserProfileAction } from '../../redux/actions/api';
 
-import ProfileRoutes from '../Profile';
-
-import Feed from './Feed';
-import TopNavigation from '../TopNavigation';
 import LoadingPage from '../LoadingPage';
+import ErrorPage from '../ErrorPage';
+
+const TopNavigation = lazy(() => import('../TopNavigation'));
+const EditProfilePage = lazy(() => import('../Profile/EditProfilePage'));
+const Feed = lazy(() => import('./Feed'));
+const ProfilePage = lazy(() => import('../Profile/ProfilePage'));
 
 const useStyles = makeStyles(theme => {
   const containerLarge = {
@@ -33,7 +35,7 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-function AuthenticatedRoutes() {
+export default function AuthenticatedRoutes() {
   const classes = useStyles();
   const dispatch = useDispatch();
   const user = useSelector(state => state.api.user);
@@ -44,19 +46,67 @@ function AuthenticatedRoutes() {
   }, [dispatch, userId]);
 
   const withProps = Component => props =>
-    user ? <Component user={user} {...props} /> : <LoadingPage />;
+    user ? (
+      <Component user={user} isOwner={true} {...props} />
+    ) : (
+      <LoadingPage />
+    );
 
   return (
-    <>
+    <Suspense fallback={<LoadingPage />}>
       <TopNavigation userName={userName} />
       <section className={classes.container}>
         <Switch>
-          <Route path={`/${userName}`} component={withProps(ProfileRoutes)} />
           <Route exact path="/" component={withProps(Feed)} />
+          <Route
+            exact
+            path="/accounts/edit"
+            component={withProps(EditProfilePage)}
+          />
+          <Route
+            exact
+            path="/accounts/change-password"
+            component={withProps(EditProfilePage)}
+          />
+          <Route
+            exact
+            path={`/${userName}`}
+            component={withProps(ProfilePage)}
+          />
+          <Route exact path="/:userName" component={CheckForInstaUser} />
+          <Route component={ErrorPage} />
         </Switch>
       </section>
-    </>
+    </Suspense>
   );
 }
 
-export default AuthenticatedRoutes;
+function CheckForInstaUser(props) {
+  const dispatch = useDispatch();
+  const userProfile = useSelector(({ api }) => api.userProfile);
+  const {
+    match: {
+      params: { userName }
+    }
+  } = props;
+
+  useEffect(() => {
+    dispatch(getUserProfileAction({ params: userName }));
+  }, [dispatch, userName]);
+
+  switch (userProfile && userProfile.status) {
+    case 'failed':
+      return <ErrorPage />;
+
+    case 'ok':
+      const profilePageProps = {
+        ...props,
+        user: userProfile.data,
+        isOwner: false
+      };
+      return <ProfilePage {...profilePageProps} />;
+
+    default:
+      return <LoadingPage />;
+  }
+}

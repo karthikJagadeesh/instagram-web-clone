@@ -1,6 +1,21 @@
-import { GET_USER_SUCCESS, GET_PROFILE_POSTS_SUCCESS } from '../constants';
+import {
+  GET_USER_SUCCESS,
+  GET_PROFILE_POSTS_SUCCESS,
+  GET_SUGGESTIONS_SUCCESS,
+  GET_USER_PROFILE_SUCCESS
+} from '../constants';
 
-export default function(state = {}, action) {
+const initialState = {
+  user: undefined,
+  profilePosts: undefined,
+  suggestions: undefined,
+  userProfile: {
+    data: undefined,
+    status: undefined
+  }
+};
+
+export default function(state = initialState, action) {
   switch (action.type) {
     case GET_USER_SUCCESS:
       return {
@@ -12,6 +27,21 @@ export default function(state = {}, action) {
       return {
         ...state,
         profilePosts: action.data
+      };
+
+    case GET_SUGGESTIONS_SUCCESS:
+      return {
+        ...state,
+        suggestions: action.data
+      };
+
+    case GET_USER_PROFILE_SUCCESS:
+      return {
+        ...state,
+        userProfile: {
+          data: action.data,
+          status: action.status
+        }
       };
 
     default:

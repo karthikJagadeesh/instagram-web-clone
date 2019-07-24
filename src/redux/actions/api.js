@@ -4,7 +4,9 @@ import {
   UPDATE_USER,
   CHANGE_PASSWORD,
   UPLOAD_POST,
-  GET_PROFILE_POSTS
+  GET_PROFILE_POSTS,
+  GET_SUGGESTIONS,
+  GET_USER_PROFILE
 } from '../constants';
 
 export const userActions = {
@@ -37,7 +39,19 @@ export const uploadPostAction = ({ payload }) => ({
   payload
 });
 
-export const getProfilePostsAction = () => ({
+export const getProfilePostsAction = ({ params }) => ({
   type: GET_PROFILE_POSTS,
-  path: '/profile-posts'
+  path: '/profile-posts',
+  params
+});
+
+export const getSuggestionsAction = () => ({
+  type: GET_SUGGESTIONS,
+  path: '/feed/suggestions'
+});
+
+export const getUserProfileAction = ({ params }) => ({
+  type: GET_USER_PROFILE,
+  path: '',
+  params
 });

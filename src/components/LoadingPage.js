@@ -25,7 +25,7 @@ const useStyles = makeStyles({
   }
 });
 
-function LoadingPage() {
+export default function LoadingPage() {
   const classes = useStyles();
 
   return (
@@ -34,5 +34,3 @@ function LoadingPage() {
     </section>
   );
 }
-
-export default LoadingPage;

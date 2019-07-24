@@ -169,17 +169,14 @@ const useProfilePostsStyles = makeStyles(theme => ({
   }
 }));
 
-function ProfilePosts() {
+function ProfilePosts({ user }) {
   const classes = useProfilePostsStyles();
-  const { user, profilePosts } = useSelector(state => ({
-    user: state.api.user,
-    profilePosts: state.api.profilePosts
-  }));
+  const profilePosts = useSelector(state => state.api.profilePosts);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getProfilePostsAction());
-  }, [dispatch]);
+    dispatch(getProfilePostsAction({ params: user.id }));
+  }, [dispatch, user.id]);
 
   if (user.posts === 0) {
     return (
@@ -277,7 +274,7 @@ const useProfilePostTabsStyles = makeStyles(theme => {
   };
 });
 
-export default function ProfilePostTabs() {
+export default function ProfilePostTabs({ user, isOwner }) {
   const classes = useProfilePostTabsStyles();
   const [value, setValue] = useState(0);
 
@@ -336,19 +333,17 @@ export default function ProfilePostTabs() {
         <Hidden xsDown>
           <Tabs {...tabsProps}>
             <Tab {...postsTabLargeProps} />
-            <Tab {...savedTabLargeProps} />
+            {isOwner && <Tab {...savedTabLargeProps} />}
           </Tabs>
         </Hidden>
         <Hidden smUp>
           <Tabs {...tabsProps}>
             <Tab {...postsTabSmallProps} />
-            <Tab {...savedTabSmallProps} />
+            {isOwner && <Tab {...savedTabSmallProps} />}
           </Tabs>
         </Hidden>
-        <Hidden smUp>
-          <Divider />
-        </Hidden>
-        {value === 0 && <ProfilePosts />}
+        <Hidden smUp>{!user.posts && <Divider />}</Hidden>
+        {value === 0 && <ProfilePosts user={user} />}
         {value === 1 && <SavedPosts />}
       </section>
     </>

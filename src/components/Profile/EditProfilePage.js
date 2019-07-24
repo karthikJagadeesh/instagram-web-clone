@@ -499,12 +499,7 @@ const useEditProfilePageStyles = makeStyles(theme => ({
   }
 }));
 
-function EditProfilePage({
-  user,
-  location: { pathname },
-  history,
-  match: { path }
-}) {
+function EditProfilePage({ user, location: { pathname }, history }) {
   const classes = useEditProfilePageStyles();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -512,11 +507,11 @@ function EditProfilePage({
   const handleListClick = index => () => {
     switch (index) {
       case 0:
-        history.push(`${path}/edit`);
+        history.push('edit');
         break;
 
       case 1: {
-        history.push(`${path}/change-password`);
+        history.push('change-password');
         break;
       }
 

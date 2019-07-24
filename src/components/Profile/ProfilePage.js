@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import Button from '@material-ui/core/Button';
@@ -58,7 +58,6 @@ function OptionsMenu({ onClose, history }) {
   const classes = useOptionsMenuStyles();
   const [showLogOutMessage, toggleLogOutMessage] = useState(false);
   const dispatch = useDispatch();
-  const pathName = useSelector(({ router }) => router.location.pathname);
 
   const dialogProps = {
     open: true,
@@ -75,7 +74,7 @@ function OptionsMenu({ onClose, history }) {
     dispatch(logOutAction());
   };
   const handleChangePasswordClick = () => {
-    history.push(`${pathName}/change-password`);
+    history.push('accounts/change-password');
   };
 
   const logOutMessage = (
@@ -145,46 +144,56 @@ const useProfileNameSectionStyles = makeStyles({
 });
 
 function ProfileNameSection({
+  isOwner,
   user: { userName },
   path,
   handleOptionsMenuClick
 }) {
   const classes = useProfileNameSectionStyles();
 
+  const editProfile = (
+    <Link to="accounts/edit">
+      <Button variant="outlined" className={classes.button}>
+        Edit Profile
+      </Button>
+    </Link>
+  );
+  const settings = (
+    <div
+      className={classes.settingsWrapper}
+      onClick={handleOptionsMenuClick(true)}
+    >
+      <Settings className={classes.settings} />
+    </div>
+  );
+  const follow = (
+    <Button variant="contained" color="primary" className={classes.button}>
+      Follow
+    </Button>
+  );
+
   return (
     <>
       <Hidden xsDown>
         <section className={classes.userNameSection}>
           <Typography className={classes.userName}>{userName}</Typography>
-          <Link to={`${path}/edit`}>
-            <Button variant="outlined" className={classes.button}>
-              Edit Profile
-            </Button>
-          </Link>
-          <div
-            className={classes.settingsWrapper}
-            onClick={handleOptionsMenuClick(true)}
-          >
-            <Settings className={classes.settings} />
-          </div>
+          {isOwner ? (
+            <>
+              {editProfile}
+              {settings}
+            </>
+          ) : (
+            follow
+          )}
         </section>
       </Hidden>
       <Hidden smUp>
         <section>
           <div className={classes.userNameDivSmall}>
             <Typography className={classes.userName}>{userName}</Typography>
-            <div
-              className={classes.settingsWrapper}
-              onClick={handleOptionsMenuClick(true)}
-            >
-              <Settings className={classes.settings} />
-            </div>
+            {isOwner && settings}
           </div>
-          <Link to={`${path}/edit`}>
-            <Button variant="outlined" className={classes.button} fullWidth>
-              Edit Profile
-            </Button>
-          </Link>
+          {isOwner ? editProfile : follow}
         </section>
       </Hidden>
     </>
@@ -319,7 +328,12 @@ const useProfilePageStyles = makeStyles({
   }
 });
 
-function ProfilePage({ user, history, match: { path } }) {
+export default function ProfilePage({
+  user,
+  isOwner,
+  history,
+  match: { path }
+}) {
   const classes = useProfilePageStyles();
   const [showDialog, toggleDialog] = useState(false);
   const [showOptionsMenu, toggleOptionsMenu] = useState(false);
@@ -330,10 +344,11 @@ function ProfilePage({ user, history, match: { path } }) {
 
   const profilePictureLargeProps = {
     user,
-    onImageClick: () => toggleDialog(true),
+    onImageClick: isOwner ? () => toggleDialog(true) : undefined,
     loading,
     setLoading,
-    inputRef
+    inputRef,
+    isOwner
   };
   const profilePictureSmallProps = {
     size: 77,
@@ -347,6 +362,7 @@ function ProfilePage({ user, history, match: { path } }) {
     inputRef
   };
   const profileNameSectionProps = {
+    isOwner,
     handleOptionsMenuClick,
     user,
     path
@@ -385,9 +401,7 @@ function ProfilePage({ user, history, match: { path } }) {
           onClose={handleOptionsMenuClick(false)}
         />
       )}
-      <ProfilePostsTab />
+      <ProfilePostsTab user={user} isOwner={isOwner} />
     </>
   );
 }
-
-export default ProfilePage;

@@ -99,7 +99,7 @@ const useProfilePictureStyles = makeStyles({
     position: 'relative',
     placeItems: 'center',
     '&:hover': {
-      cursor: 'pointer'
+      cursor: ({ isOwner }) => (isOwner ? 'pointer' : 'default')
     }
   },
   personSection: {
@@ -120,9 +120,10 @@ export function ProfilePicture({
   onImageClick,
   loading,
   setLoading,
-  inputRef
+  inputRef,
+  isOwner
 }) {
-  const classes = useProfilePictureStyles({ size });
+  const classes = useProfilePictureStyles({ size, isOwner });
   const dispatch = useDispatch();
   const buttonRef = useRef();
 

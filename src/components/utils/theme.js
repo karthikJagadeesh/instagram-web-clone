@@ -55,6 +55,16 @@ const theme = createMuiTheme({
       }
     },
 
+    MuiPaper: {
+      root: {
+        boxShadow: 'none',
+        border: '1px solid #e6e6e6'
+      },
+      elevation1: {
+        boxShadow: 'unset'
+      }
+    },
+
     MuiAppBar: {
       root: {
         boxShadow: 'none',
