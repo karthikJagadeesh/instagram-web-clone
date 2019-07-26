@@ -171,7 +171,7 @@ const useProfilePostsStyles = makeStyles(theme => ({
   }
 }));
 
-function ProfilePosts({ user }) {
+function ProfilePosts({ user, isOwner }) {
   const classes = useProfilePostsStyles();
   const profilePosts = useSelector(state => state.api.profilePosts);
   const dispatch = useDispatch();
@@ -185,7 +185,9 @@ function ProfilePosts({ user }) {
       <section className={classes.section}>
         <div className={classes.noPicDiv}>
           <div className={classes.uploadPhotoIcon} />
-          <Typography variant="h4">Upload a Photo</Typography>
+          <Typography variant="h4">
+            {isOwner ? 'Upload a Photo' : 'No Photos'}
+          </Typography>
         </div>
       </section>
     );
@@ -351,7 +353,7 @@ export default function ProfilePostTabs({ user, isOwner }) {
           </Tabs>
         </Hidden>
         <Hidden smUp>{!user.posts && <Divider />}</Hidden>
-        {value === 0 && <ProfilePosts user={user} />}
+        {value === 0 && <ProfilePosts user={user} isOwner={isOwner} />}
         {value === 1 && <SavedPosts />}
       </section>
     </>
