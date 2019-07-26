@@ -50,8 +50,9 @@ export const getSuggestionsAction = () => ({
   path: '/feed/suggestions'
 });
 
-export const getUserProfileAction = ({ params }) => ({
+export const getUserProfileAction = ({ params, key }) => ({
   type: GET_USER_PROFILE,
   path: '',
-  params
+  params,
+  key
 });

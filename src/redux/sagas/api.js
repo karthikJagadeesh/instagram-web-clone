@@ -120,10 +120,10 @@ function* getSuggestions({ path }) {
   }
 }
 
-function* getUserProfile({ path, params }) {
+function* getUserProfile({ path, params, key }) {
   try {
     const { data, status } = yield apply(client, client.get, [path, params]);
-    yield put({ type: GET_USER_PROFILE_SUCCESS, data, status });
+    yield put({ type: GET_USER_PROFILE_SUCCESS, data, status, key });
   } catch ({ error }) {
     console.error(error);
     return;

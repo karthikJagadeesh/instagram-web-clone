@@ -14,6 +14,8 @@ import IconsSpriteSheet2 from '../../images/icons-spritesheet2.png';
 
 import { getProfilePostsAction } from '../../redux/actions/api';
 
+import { ProfilePostsSkeleton } from '../utils/skeleton';
+
 const commonIconProps = {
   backgroundImage: `url(${IconsSpriteSheet})`,
   backgroundRepeat: 'no-repeat',
@@ -201,7 +203,13 @@ function ProfilePosts({ user }) {
     );
   }
 
-  return null;
+  return (
+    <article className={classes.article}>
+      <div className={classes.postContainer}>
+        <ProfilePostsSkeleton count={user.posts} />
+      </div>
+    </article>
+  );
 }
 
 const useProfilePostTabsStyles = makeStyles(theme => {

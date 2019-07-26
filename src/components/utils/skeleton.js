@@ -2,6 +2,8 @@ import React from 'react';
 
 import { makeStyles } from '@material-ui/core/styles';
 
+import ImagePlaceHolder from '../../images/image-placeholder.jpg';
+
 const useSkeletonStyles = makeStyles({
   card: {
     display: 'grid',
@@ -58,6 +60,25 @@ export function SuggestionsSkeleton({ count }) {
   return times(count, card);
 }
 
+const useProfilePostsSkeletonStyles = makeStyles({
+  img: {
+    width: '100%'
+  }
+});
+
+export function ProfilePostsSkeleton({ count }) {
+  const classes = useProfilePostsSkeletonStyles();
+  const image = key => (
+    <img
+      key={key}
+      src={ImagePlaceHolder}
+      alt="profile pic placeholder"
+      className={classes.img}
+    />
+  );
+  return times(count, image);
+}
+
 function times(count, cb, list = []) {
-  return count === 1 ? list : times(--count, cb, [...list, cb(count)]);
+  return count === 0 ? list : times(--count, cb, [...list, cb(count)]);
 }

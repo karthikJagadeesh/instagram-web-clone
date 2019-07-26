@@ -40,8 +40,10 @@ export default function(state = initialState, action) {
         ...state,
         userProfile: {
           data: action.data,
-          status: action.status
-        }
+          status: action.status,
+          key: action.key
+        },
+        profilePosts: undefined
       };
 
     default:

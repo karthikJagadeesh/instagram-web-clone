@@ -1,4 +1,4 @@
-import React, { useEffect, lazy, Suspense } from 'react';
+import React, { useEffect, lazy, Suspense, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
@@ -8,6 +8,8 @@ import { userActions, getUserProfileAction } from '../../redux/actions/api';
 
 import LoadingPage from '../LoadingPage';
 import ErrorPage from '../ErrorPage';
+
+import { generateKey } from '../utils';
 
 const TopNavigation = lazy(() => import('../TopNavigation'));
 const EditProfilePage = lazy(() => import('../Profile/EditProfilePage'));
@@ -89,12 +91,13 @@ function CheckForInstaUser(props) {
       params: { userName }
     }
   } = props;
+  const { current: key } = useRef(generateKey());
 
   useEffect(() => {
-    dispatch(getUserProfileAction({ params: userName }));
-  }, [dispatch, userName]);
+    dispatch(getUserProfileAction({ params: userName, key }));
+  }, [dispatch, key, userName]);
 
-  switch (userProfile && userProfile.status) {
+  switch (userProfile.key === key && userProfile && userProfile.status) {
     case 'failed':
       return <ErrorPage />;
 

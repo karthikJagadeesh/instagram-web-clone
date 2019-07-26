@@ -46,3 +46,9 @@ export function useLoader() {
 
   return { loading, setLoading, formError };
 }
+
+export function generateKey() {
+  return Math.random()
+    .toString(36)
+    .substr(2);
+}
