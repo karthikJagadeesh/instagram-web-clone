@@ -16,12 +16,12 @@ const useStyles = makeStyles({
     placeItems: 'center'
   },
   span: {
-    height: 24,
-    width: 24,
+    height: 48,
+    width: 48,
     backgroundRepeat: 'no-repeat',
     backgroundImage: `url(${IconsSpriteSheet2})`,
-    backgroundSize: '355px 344px',
-    backgroundPosition: '-227px -197px'
+    backgroundSize: '710px 688px',
+    backgroundPosition: '-454px -394px'
   }
 });
 
