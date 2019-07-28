@@ -6,7 +6,9 @@ import {
   UPLOAD_POST,
   GET_PROFILE_POSTS,
   GET_SUGGESTIONS,
-  GET_USER_PROFILE
+  GET_USER_PROFILE,
+  FOLLOW,
+  GET_ALL_POSTS
 } from '../constants';
 
 export const userActions = {
@@ -50,9 +52,22 @@ export const getSuggestionsAction = () => ({
   path: '/feed/suggestions'
 });
 
+export const getAllPostsAction = () => ({
+  type: GET_ALL_POSTS,
+  path: '/feed'
+});
+
 export const getUserProfileAction = ({ params, key }) => ({
   type: GET_USER_PROFILE,
   path: '',
   params,
+  key
+});
+
+export const followAction = ({ params, payload, key }) => ({
+  type: FOLLOW,
+  path: '/friendship',
+  params,
+  payload,
   key
 });

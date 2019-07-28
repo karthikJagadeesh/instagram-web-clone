@@ -21,7 +21,11 @@ import {
   GET_SUGGESTIONS,
   GET_SUGGESTIONS_SUCCESS,
   GET_USER_PROFILE,
-  GET_USER_PROFILE_SUCCESS
+  GET_USER_PROFILE_SUCCESS,
+  FOLLOW,
+  FOLLOW_SUCESS,
+  GET_ALL_POSTS,
+  GET_ALL_POSTS_SUCCESS
 } from '../constants';
 
 function* getUser({ path, params }) {
@@ -124,6 +128,39 @@ function* getUserProfile({ path, params, key }) {
   try {
     const { data, status } = yield apply(client, client.get, [path, params]);
     yield put({ type: GET_USER_PROFILE_SUCCESS, data, status, key });
+    return;
+  } catch ({ error }) {
+    console.error(error);
+    return;
+  }
+}
+
+function* follow({ path, params, payload, key }) {
+  try {
+    const { following, status } = yield apply(client, client.post, [
+      path,
+      params,
+      payload
+    ]);
+    yield put({
+      type: FOLLOW_SUCESS,
+      data: { status, following, id: params },
+      key
+    });
+    const id = yield select(({ api }) => api.user.id);
+    yield put(userActions.get(id));
+    return;
+  } catch ({ error }) {
+    console.error(error);
+    return;
+  }
+}
+
+function* getAllPosts({ path }) {
+  try {
+    const { data } = yield apply(client, client.get, [path, '']);
+    yield put({ type: GET_ALL_POSTS_SUCCESS, data });
+    return;
   } catch ({ error }) {
     console.error(error);
     return;
@@ -143,4 +180,8 @@ export function* apiSaga() {
   yield takeEvery(GET_SUGGESTIONS, getSuggestions);
 
   yield takeEvery(GET_USER_PROFILE, getUserProfile);
+
+  yield takeEvery(FOLLOW, follow);
+
+  yield takeEvery(GET_ALL_POSTS, getAllPosts);
 }

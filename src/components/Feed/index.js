@@ -59,7 +59,7 @@ export default function AuthenticatedRoutes() {
       <TopNavigation userName={userName} />
       <section className={classes.container}>
         <Switch>
-          <Route exact path="/" component={withProps(Feed)} />
+          <Route exact path="/" component={Feed} />
           <Route
             exact
             path="/accounts/edit"

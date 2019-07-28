@@ -6,6 +6,11 @@ import Typography from '@material-ui/core/Typography';
 
 import { makeStyles } from '@material-ui/core/styles';
 
+const COLORS = {
+  blue: '#3897f0',
+  white: '#ffffff'
+};
+
 export function ErrorText({ text, ...props }) {
   return (
     <Typography
@@ -23,12 +28,12 @@ export function ErrorText({ text, ...props }) {
 const useLoaderStyles = makeStyles({
   circlularProgress: {
     position: 'absolute',
-    color: '#464646'
+    color: ({ color = '#464646' }) => COLORS[color]
   }
 });
 
-export function Loader() {
-  const classes = useLoaderStyles();
+export function Loader({ color }) {
+  const classes = useLoaderStyles({ color });
   return <CirclularProgress className={classes.circlularProgress} size={24} />;
 }
 

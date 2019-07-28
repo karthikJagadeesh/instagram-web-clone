@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -9,19 +9,36 @@ import Typography from '@material-ui/core/Typography';
 
 import { makeStyles } from '@material-ui/core/styles';
 
-import { getSuggestionsAction } from '../../redux/actions/api';
+import {
+  getSuggestionsAction,
+  getAllPostsAction,
+  followAction
+} from '../../redux/actions/api';
 
 import { SuggestionsSkeleton } from '../utils/skeleton';
+import { generateKey, Loader } from '../utils';
 
-export default function Feed({ user }) {
-  if (user.posts === 0 && user.following === 0) {
-    return <FriendCard />;
+import LoadingPage from '../LoadingPage';
+
+export default function Feed() {
+  const dispatch = useDispatch();
+  const allPosts = useSelector(state => state.api.allPosts);
+
+  useEffect(() => {
+    dispatch(getAllPostsAction());
+  }, [dispatch]);
+
+  if (allPosts) {
+    if (allPosts.length > 0) {
+      return <div>List of Posts</div>;
+    }
+    return <SuggestionsCard />;
   }
 
-  return <div>List of Posts</div>;
+  return <LoadingPage />;
 }
 
-const useFriendCardStyles = makeStyles(theme => ({
+const useSuggestionsCardStyles = makeStyles(theme => ({
   article: {
     margin: '0 12px',
     display: 'grid',
@@ -32,17 +49,35 @@ const useFriendCardStyles = makeStyles(theme => ({
     [theme.breakpoints.down('xs')]: {
       fontSize: '1rem'
     }
+  },
+
+  paper: {
+    padding: '8px 0px'
+  },
+
+  buttonWrapper: {
+    padding: 16
   }
 }));
 
-function FriendCard() {
-  const classes = useFriendCardStyles();
+function SuggestionsCard() {
+  const classes = useSuggestionsCardStyles();
   const dispatch = useDispatch();
-  const suggestions = useSelector(({ api }) => api.suggestions);
+  const suggestions = useSelector(({ api }) => api.suggestions.data);
+  const [showButton, setButton] = useState(false);
 
   useEffect(() => {
     dispatch(getSuggestionsAction());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (suggestions) {
+      const isFollowingAnyone = suggestions.some(friend => friend.following);
+      if (isFollowingAnyone) {
+        setButton(true);
+      }
+    }
+  }, [suggestions]);
 
   const typographyProps = {
     variant: 'h6',
@@ -50,24 +85,39 @@ function FriendCard() {
     gutterBottom: true,
     className: classes.typographyHeading
   };
+  const buttonProps = {
+    variant: 'contained',
+    color: 'primary',
+    fullWidth: true,
+    onClick: () => dispatch(getAllPostsAction())
+  };
 
   return (
     <article className={classes.article}>
       <Typography {...typographyProps}>Suggestions For You</Typography>
-      <Paper>
+      <Paper className={classes.paper}>
         {suggestions ? (
           suggestions.map(friend => (
-            <FriendCardItem friend={friend} key={friend.id} />
+            <SuggestionsCardItem
+              friend={friend}
+              key={friend.id}
+              suggestionsKey={suggestions.key}
+            />
           ))
         ) : (
           <SuggestionsSkeleton count={12} />
+        )}
+        {showButton && (
+          <div className={classes.buttonWrapper}>
+            <Button {...buttonProps}>Get Started</Button>
+          </div>
         )}
       </Paper>
     </article>
   );
 }
 
-const useFriendCardItemStyles = makeStyles({
+const useSuggestionsCardItemStyles = makeStyles({
   card: {
     display: 'grid',
     gridAutoFlow: 'column',
@@ -93,18 +143,40 @@ const useFriendCardItemStyles = makeStyles({
   }
 });
 
-function FriendCardItem({ friend: { profileImageUrl, userName, fullName } }) {
-  const classes = useFriendCardItemStyles();
+function SuggestionsCardItem({
+  friend: { id, profileImageUrl, userName, fullName, following },
+  suggestionsKey
+}) {
+  const classes = useSuggestionsCardItemStyles();
+  const dispatch = useDispatch();
+  const { current: key } = useRef(generateKey());
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    suggestionsKey === key && setLoading(false);
+  }, [key, suggestionsKey]);
+
+  const handleFollowButtonClick = () => {
+    setLoading(true);
+    dispatch(followAction({ key, params: id, payload: { follow: true } }));
+  };
 
   const avatarProps = {
     alt: 'user-image',
     src: profileImageUrl,
     className: classes.avatar
   };
-  const buttonProps = {
+  const followButtonProps = {
+    disabled: loading,
     variant: 'contained',
     color: 'primary',
-    className: classes.button
+    className: classes.button,
+    onClick: handleFollowButtonClick
+  };
+  const followingButtonProps = {
+    variant: 'outlined',
+    className: classes.button,
+    onClick: undefined
   };
 
   return (
@@ -122,7 +194,12 @@ function FriendCardItem({ friend: { profileImageUrl, userName, fullName } }) {
           </Typography>
         </div>
       </div>
-      <Button {...buttonProps}>Follow</Button>
+      {following && <Button {...followingButtonProps}>Following</Button>}
+      {!following && (
+        <Button {...followButtonProps}>
+          {loading && <Loader color="blue" />}Follow
+        </Button>
+      )}
     </div>
   );
 }
