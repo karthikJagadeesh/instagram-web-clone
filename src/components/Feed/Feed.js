@@ -4,8 +4,11 @@ import { Link } from 'react-router-dom';
 
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
+import Zoom from '@material-ui/core/Zoom';
 
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -63,7 +66,7 @@ const useSuggestionsCardStyles = makeStyles(theme => ({
 function SuggestionsCard() {
   const classes = useSuggestionsCardStyles();
   const dispatch = useDispatch();
-  const suggestions = useSelector(({ api }) => api.suggestions.data);
+  const { data: suggestions, key } = useSelector(({ api }) => api.suggestions);
   const [showButton, setButton] = useState(false);
 
   useEffect(() => {
@@ -75,6 +78,8 @@ function SuggestionsCard() {
       const isFollowingAnyone = suggestions.some(friend => friend.following);
       if (isFollowingAnyone) {
         setButton(true);
+      } else {
+        setButton(false);
       }
     }
   }, [suggestions]);
@@ -101,7 +106,7 @@ function SuggestionsCard() {
             <SuggestionsCardItem
               friend={friend}
               key={friend.id}
-              suggestionsKey={suggestions.key}
+              suggestionsKey={key}
             />
           ))
         ) : (
@@ -140,6 +145,15 @@ const useSuggestionsCardItemStyles = makeStyles({
   avatar: {
     width: 44,
     height: 44
+  },
+
+  typography: {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden'
+  },
+  nameWrapper: {
+    overflow: 'hidden',
+    whiteSpace: 'nowrap'
   }
 });
 
@@ -151,14 +165,26 @@ function SuggestionsCardItem({
   const dispatch = useDispatch();
   const { current: key } = useRef(generateKey());
   const [loading, setLoading] = useState(false);
+  const [loadingUnfollow, setLoadingUnfollow] = useState(false);
+  const [dialog, setDialog] = useState(false);
 
   useEffect(() => {
-    suggestionsKey === key && setLoading(false);
+    if (suggestionsKey === key) {
+      setLoading(false);
+      setLoadingUnfollow(false);
+    }
   }, [key, suggestionsKey]);
+
+  const handleDialogClick = bool => () => setDialog(bool);
 
   const handleFollowButtonClick = () => {
     setLoading(true);
     dispatch(followAction({ key, params: id, payload: { follow: true } }));
+  };
+  const handleUnfollowButtonClick = () => {
+    setDialog(false);
+    setLoadingUnfollow(true);
+    dispatch(followAction({ key, params: id, payload: { follow: false } }));
   };
 
   const avatarProps = {
@@ -174,10 +200,27 @@ function SuggestionsCardItem({
     onClick: handleFollowButtonClick
   };
   const followingButtonProps = {
+    disabled: loadingUnfollow,
     variant: 'outlined',
     className: classes.button,
-    onClick: undefined
+    onClick: handleDialogClick(true)
   };
+  const unfollowDialogProps = {
+    userName,
+    onClose: handleDialogClick(false),
+    profileImageUrl,
+    handleUnfollowButtonClick
+  };
+  const followingButton = (
+    <Button {...followingButtonProps}>
+      {loadingUnfollow && <Loader />}Following
+    </Button>
+  );
+  const followButton = (
+    <Button {...followButtonProps}>
+      {loading && <Loader color="blue" />}Follow
+    </Button>
+  );
 
   return (
     <div className={classes.card}>
@@ -185,21 +228,101 @@ function SuggestionsCardItem({
         <Link to={`${userName}`}>
           <Avatar {...avatarProps} />
         </Link>
-        <div>
+        <div className={classes.nameWrapper}>
           <Link to={`${userName}`}>
-            <Typography variant="subtitle2">{userName}</Typography>
+            <Typography variant="subtitle2" className={classes.typography}>
+              {userName}
+            </Typography>
           </Link>
-          <Typography color="textSecondary" variant="body2">
+          <Typography
+            color="textSecondary"
+            variant="body2"
+            className={classes.typography}
+          >
             {fullName}
           </Typography>
         </div>
       </div>
-      {following && <Button {...followingButtonProps}>Following</Button>}
-      {!following && (
-        <Button {...followButtonProps}>
-          {loading && <Loader color="blue" />}Follow
-        </Button>
-      )}
+      {following ? followingButton : followButton}
+      {dialog && <UnfollowDialog {...unfollowDialogProps} />}
     </div>
+  );
+}
+
+const padding = '12px 8px';
+const useUnfollowDialogStyles = makeStyles(theme => ({
+  wrapper: {
+    display: 'grid',
+    justifyContent: 'center',
+    padding: '32px 16px 16px'
+  },
+  avatar: {
+    width: 90,
+    height: 90
+  },
+
+  dialogScrollPaper: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(auto, 496px)'
+  },
+
+  cancelButton: {
+    padding
+  },
+  unfollowButton: {
+    color: theme.palette.error.main,
+    padding
+  },
+
+  typography: {
+    padding: '16px 16px 32px'
+  }
+}));
+
+function UnfollowDialog({
+  onClose,
+  userName,
+  profileImageUrl,
+  handleUnfollowButtonClick
+}) {
+  const classes = useUnfollowDialogStyles();
+
+  const dialogProps = {
+    open: true,
+    classes: {
+      scrollPaper: classes.dialogScrollPaper
+    },
+    onClose,
+    TransitionComponent: Zoom
+  };
+  const avatarProps = {
+    className: classes.avatar,
+    alt: 'user image',
+    src: profileImageUrl
+  };
+  const typographyProps = {
+    align: 'center',
+    className: classes.typography,
+    variant: 'body2'
+  };
+
+  return (
+    <Dialog {...dialogProps}>
+      <div className={classes.wrapper}>
+        <Avatar {...avatarProps} />
+      </div>
+      <Typography {...typographyProps}>{`Unfollow @${userName}?`}</Typography>
+      <Divider />
+      <Button
+        className={classes.unfollowButton}
+        onClick={handleUnfollowButtonClick}
+      >
+        Unfollow
+      </Button>
+      <Divider />
+      <Button onClick={onClose} className={classes.cancelButton}>
+        Cancel
+      </Button>
+    </Dialog>
   );
 }

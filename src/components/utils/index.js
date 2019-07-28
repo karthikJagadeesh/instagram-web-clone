@@ -8,7 +8,8 @@ import { makeStyles } from '@material-ui/core/styles';
 
 const COLORS = {
   blue: '#3897f0',
-  white: '#ffffff'
+  white: '#ffffff',
+  grey: '#464646'
 };
 
 export function ErrorText({ text, ...props }) {
@@ -28,7 +29,7 @@ export function ErrorText({ text, ...props }) {
 const useLoaderStyles = makeStyles({
   circlularProgress: {
     position: 'absolute',
-    color: ({ color = '#464646' }) => COLORS[color]
+    color: ({ color = 'grey' }) => COLORS[color]
   }
 });
 
