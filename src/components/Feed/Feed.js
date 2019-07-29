@@ -6,6 +6,7 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import Divider from '@material-ui/core/Divider';
+import Hidden from '@material-ui/core/Hidden';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Zoom from '@material-ui/core/Zoom';
@@ -18,10 +19,8 @@ import {
   followAction
 } from '../../redux/actions/api';
 
-import { SuggestionsSkeleton } from '../utils/skeleton';
+import { SuggestionsSkeleton, AllPostsSkeleton } from '../utils/skeleton';
 import { generateKey, Loader } from '../utils';
-
-import LoadingPage from '../LoadingPage';
 
 export default function Feed() {
   const dispatch = useDispatch();
@@ -31,14 +30,41 @@ export default function Feed() {
     dispatch(getAllPostsAction());
   }, [dispatch]);
 
-  if (allPosts) {
-    if (allPosts.length > 0) {
-      return <div>List of Posts</div>;
-    }
+  if (allPosts && allPosts.length <= 0) {
     return <SuggestionsCard />;
   }
 
-  return <LoadingPage />;
+  return <AllPosts posts={allPosts} />;
+}
+
+const useAllPostsStyles = makeStyles(theme => ({
+  container: {
+    display: 'grid',
+    gridAutoFlow: 'column',
+    gridTemplateColumns: 'minmax(auto, 600px) 300px',
+    gridGap: 35,
+    [theme.breakpoints.down('sm')]: {
+      gridTemplateColumns: 'minmax(auto, 600px)',
+      justifyContent: 'center'
+    }
+  }
+}));
+
+function AllPosts() {
+  const classes = useAllPostsStyles();
+
+  return (
+    <div className={classes.container}>
+      <div>
+        <AllPostsSkeleton count={5} />
+      </div>
+      <Hidden smDown>
+        <div>
+          <SuggestionsCard side={true} />
+        </div>
+      </Hidden>
+    </div>
+  );
 }
 
 const useSuggestionsCardStyles = makeStyles(theme => ({
@@ -63,7 +89,7 @@ const useSuggestionsCardStyles = makeStyles(theme => ({
   }
 }));
 
-function SuggestionsCard() {
+function SuggestionsCard({ side = false }) {
   const classes = useSuggestionsCardStyles();
   const dispatch = useDispatch();
   const { data: suggestions, key } = useSelector(({ api }) => api.suggestions);
@@ -74,7 +100,7 @@ function SuggestionsCard() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (suggestions) {
+    if (suggestions && !side) {
       const isFollowingAnyone = suggestions.some(friend => friend.following);
       if (isFollowingAnyone) {
         setButton(true);
@@ -82,13 +108,19 @@ function SuggestionsCard() {
         setButton(false);
       }
     }
-  }, [suggestions]);
+  }, [side, suggestions]);
 
   const typographyProps = {
     variant: 'h6',
     align: 'left',
     gutterBottom: true,
     className: classes.typographyHeading
+  };
+  const typographyPropsSide = {
+    align: 'center',
+    gutterBottom: true,
+    color: 'textSecondary',
+    variant: 'subtitle2'
   };
   const buttonProps = {
     variant: 'contained',
@@ -99,16 +131,23 @@ function SuggestionsCard() {
 
   return (
     <article className={classes.article}>
-      <Typography {...typographyProps}>Suggestions For You</Typography>
+      {!side && (
+        <Typography {...typographyProps}>Suggestions For You</Typography>
+      )}
       <Paper className={classes.paper}>
+        {side && (
+          <Typography {...typographyPropsSide}>Suggestions For You</Typography>
+        )}
         {suggestions ? (
-          suggestions.map(friend => (
-            <SuggestionsCardItem
-              friend={friend}
-              key={friend.id}
-              suggestionsKey={key}
-            />
-          ))
+          suggestions.map(friend => {
+            const suggestionsCardItemProps = {
+              friend,
+              key: friend.id,
+              suggestionsKey: key,
+              side
+            };
+            return <SuggestionsCardItem {...suggestionsCardItemProps} />;
+          })
         ) : (
           <SuggestionsSkeleton count={12} />
         )}
@@ -159,7 +198,8 @@ const useSuggestionsCardItemStyles = makeStyles({
 
 function SuggestionsCardItem({
   friend: { id, profileImageUrl, userName, fullName, following },
-  suggestionsKey
+  suggestionsKey,
+  side
 }) {
   const classes = useSuggestionsCardItemStyles();
   const dispatch = useDispatch();
@@ -194,14 +234,14 @@ function SuggestionsCardItem({
   };
   const followButtonProps = {
     disabled: loading,
-    variant: 'contained',
+    variant: !side ? 'contained' : 'text',
     color: 'primary',
     className: classes.button,
     onClick: handleFollowButtonClick
   };
   const followingButtonProps = {
     disabled: loadingUnfollow,
-    variant: 'outlined',
+    variant: !side ? 'outlined' : 'text',
     className: classes.button,
     onClick: handleDialogClick(true)
   };
