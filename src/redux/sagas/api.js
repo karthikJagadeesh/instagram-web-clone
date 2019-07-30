@@ -24,6 +24,7 @@ import {
   GET_USER_PROFILE_SUCCESS,
   FOLLOW,
   FOLLOW_SUCESS,
+  FOLLOW_SUCESS_SUGGESTIONS,
   GET_ALL_POSTS,
   GET_ALL_POSTS_SUCCESS
 } from '../constants';
@@ -135,18 +136,28 @@ function* getUserProfile({ path, params, key }) {
   }
 }
 
-function* follow({ path, params, payload, key }) {
+function* follow({ path, params, payload, key, namespace }) {
   try {
     const { following, status } = yield apply(client, client.post, [
       path,
       params,
       payload
     ]);
-    yield put({
-      type: FOLLOW_SUCESS,
-      data: { status, following, id: params },
-      key
-    });
+
+    if (namespace === 'profile') {
+      yield put({
+        type: FOLLOW_SUCESS,
+        data: { status, following },
+        key,
+        namespace
+      });
+    } else {
+      yield put({
+        type: FOLLOW_SUCESS_SUGGESTIONS,
+        data: { status, following, id: params },
+        key
+      });
+    }
     const id = yield select(({ api }) => api.user.id);
     yield put(userActions.get(id));
     return;

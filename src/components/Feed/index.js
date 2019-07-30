@@ -97,6 +97,15 @@ function CheckForInstaUser(props) {
     dispatch(getUserProfileAction({ params: userName, key }));
   }, [dispatch, key, userName]);
 
+  if (userProfile.namespace === 'profile') {
+    const profilePageProps = {
+      ...props,
+      user: userProfile.data,
+      isOwner: false
+    };
+    return <ProfilePage {...profilePageProps} />;
+  }
+
   switch (userProfile.key === key && userProfile && userProfile.status) {
     case 'failed':
       return <ErrorPage />;

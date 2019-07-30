@@ -64,10 +64,11 @@ export const getUserProfileAction = ({ params, key }) => ({
   key
 });
 
-export const followAction = ({ params, payload, key }) => ({
+export const followAction = ({ params, payload, key, namespace = '' }) => ({
   type: FOLLOW,
   path: '/friendship',
   params,
   payload,
-  key
+  key,
+  namespace
 });

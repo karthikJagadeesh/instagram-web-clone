@@ -4,12 +4,9 @@ import { Link } from 'react-router-dom';
 
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import Divider from '@material-ui/core/Divider';
 import Hidden from '@material-ui/core/Hidden';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-import Zoom from '@material-ui/core/Zoom';
 
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -20,7 +17,9 @@ import {
 } from '../../redux/actions/api';
 
 import { SuggestionsSkeleton, AllPostsSkeleton } from '../utils/skeleton';
-import { generateKey, Loader } from '../utils';
+import { generateKey, Loader, LinearLoader, UnfollowDialog } from '../utils';
+
+import LoadingPage from '../LoadingPage';
 
 export default function Feed() {
   const dispatch = useDispatch();
@@ -30,7 +29,11 @@ export default function Feed() {
     dispatch(getAllPostsAction());
   }, [dispatch]);
 
-  if (allPosts && allPosts.length <= 0) {
+  if (!allPosts) {
+    return <LoadingPage />;
+  }
+
+  if (allPosts.length === 0) {
     return <SuggestionsCard />;
   }
 
@@ -92,23 +95,26 @@ const useSuggestionsCardStyles = makeStyles(theme => ({
 function SuggestionsCard({ side = false }) {
   const classes = useSuggestionsCardStyles();
   const dispatch = useDispatch();
-  const { data: suggestions, key } = useSelector(({ api }) => api.suggestions);
+  const suggestions = useSelector(({ api }) => api.suggestions);
   const [showButton, setButton] = useState(false);
+  const [disabled, setDisabled] = useState(false);
+
+  const data = suggestions.data;
 
   useEffect(() => {
     dispatch(getSuggestionsAction());
   }, [dispatch]);
 
   useEffect(() => {
-    if (suggestions && !side) {
-      const isFollowingAnyone = suggestions.some(friend => friend.following);
+    if (data && !side) {
+      const isFollowingAnyone = data.some(friend => friend.following);
       if (isFollowingAnyone) {
         setButton(true);
       } else {
         setButton(false);
       }
     }
-  }, [side, suggestions]);
+  }, [side, data]);
 
   const typographyProps = {
     variant: 'h6',
@@ -123,10 +129,14 @@ function SuggestionsCard({ side = false }) {
     variant: 'subtitle2'
   };
   const buttonProps = {
+    disabled,
     variant: 'contained',
     color: 'primary',
     fullWidth: true,
-    onClick: () => dispatch(getAllPostsAction())
+    onClick: () => {
+      setDisabled(true);
+      dispatch(getAllPostsAction());
+    }
   };
 
   return (
@@ -138,12 +148,12 @@ function SuggestionsCard({ side = false }) {
         {side && (
           <Typography {...typographyPropsSide}>Suggestions For You</Typography>
         )}
-        {suggestions ? (
-          suggestions.map(friend => {
+        {data ? (
+          data.map(friend => {
             const suggestionsCardItemProps = {
               friend,
               key: friend.id,
-              suggestionsKey: key,
+              suggestions,
               side
             };
             return <SuggestionsCardItem {...suggestionsCardItemProps} />;
@@ -156,6 +166,7 @@ function SuggestionsCard({ side = false }) {
             <Button {...buttonProps}>Get Started</Button>
           </div>
         )}
+        {disabled && <LinearLoader />}
       </Paper>
     </article>
   );
@@ -198,7 +209,7 @@ const useSuggestionsCardItemStyles = makeStyles({
 
 function SuggestionsCardItem({
   friend: { id, profileImageUrl, userName, fullName, following },
-  suggestionsKey,
+  suggestions,
   side
 }) {
   const classes = useSuggestionsCardItemStyles();
@@ -209,11 +220,11 @@ function SuggestionsCardItem({
   const [dialog, setDialog] = useState(false);
 
   useEffect(() => {
-    if (suggestionsKey === key) {
+    if (suggestions.key === key) {
       setLoading(false);
       setLoadingUnfollow(false);
     }
-  }, [key, suggestionsKey]);
+  }, [key, suggestions]);
 
   const handleDialogClick = bool => () => setDialog(bool);
 
@@ -286,83 +297,5 @@ function SuggestionsCardItem({
       {following ? followingButton : followButton}
       {dialog && <UnfollowDialog {...unfollowDialogProps} />}
     </div>
-  );
-}
-
-const padding = '12px 8px';
-const useUnfollowDialogStyles = makeStyles(theme => ({
-  wrapper: {
-    display: 'grid',
-    justifyContent: 'center',
-    padding: '32px 16px 16px'
-  },
-  avatar: {
-    width: 90,
-    height: 90
-  },
-
-  dialogScrollPaper: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(auto, 496px)'
-  },
-
-  cancelButton: {
-    padding
-  },
-  unfollowButton: {
-    color: theme.palette.error.main,
-    padding
-  },
-
-  typography: {
-    padding: '16px 16px 32px'
-  }
-}));
-
-function UnfollowDialog({
-  onClose,
-  userName,
-  profileImageUrl,
-  handleUnfollowButtonClick
-}) {
-  const classes = useUnfollowDialogStyles();
-
-  const dialogProps = {
-    open: true,
-    classes: {
-      scrollPaper: classes.dialogScrollPaper
-    },
-    onClose,
-    TransitionComponent: Zoom
-  };
-  const avatarProps = {
-    className: classes.avatar,
-    alt: 'user image',
-    src: profileImageUrl
-  };
-  const typographyProps = {
-    align: 'center',
-    className: classes.typography,
-    variant: 'body2'
-  };
-
-  return (
-    <Dialog {...dialogProps}>
-      <div className={classes.wrapper}>
-        <Avatar {...avatarProps} />
-      </div>
-      <Typography {...typographyProps}>{`Unfollow @${userName}?`}</Typography>
-      <Divider />
-      <Button
-        className={classes.unfollowButton}
-        onClick={handleUnfollowButtonClick}
-      >
-        Unfollow
-      </Button>
-      <Divider />
-      <Button onClick={onClose} className={classes.cancelButton}>
-        Cancel
-      </Button>
-    </Dialog>
   );
 }

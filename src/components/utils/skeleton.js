@@ -103,7 +103,7 @@ const useAllPostsSkeletonStyles = makeStyles(theme => ({
     border: '1px solid #e6e6e6',
     background: '#EEEEEE',
     marginBottom: 60,
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('xs')]: {
       border: 'unset',
       marginBottom: 16
     }

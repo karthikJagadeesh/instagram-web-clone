@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, useRef, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import Button from '@material-ui/core/Button';
@@ -17,11 +17,12 @@ import Settings from '@material-ui/icons/Settings';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { logOutAction } from '../../redux/actions/user';
+import { followAction } from '../../redux/actions/api';
 
 import ProfilePostsTab from './ProfilePosts';
 
 import { ChangeProfilePicDialog, ProfilePicture } from './utils';
-import { useLoader } from '../utils';
+import { useLoader, generateKey, Loader, UnfollowDialog } from '../utils';
 
 const useOptionsItemStyles = makeStyles({
   button: {
@@ -111,7 +112,7 @@ const userNameSection = {
   display: 'grid',
   gridGap: 20,
   gridAutoFlow: 'column',
-  gridTemplateColumns: 'minmax(auto, max-content) 106px 30px',
+  gridTemplateColumns: 'minmax(auto, max-content) minmax(auto, 112px) 30px',
   alignItems: 'center'
 };
 const useProfileNameSectionStyles = makeStyles({
@@ -145,11 +146,49 @@ const useProfileNameSectionStyles = makeStyles({
 
 function ProfileNameSection({
   isOwner,
-  user: { userName },
-  path,
+  user: { userName, isFollowingOwner, ownerIsFollowing, id, profileImageUrl },
   handleOptionsMenuClick
 }) {
   const classes = useProfileNameSectionStyles();
+  const dispatch = useDispatch();
+  const { current: key } = useRef(generateKey());
+  const [loading, setLoading] = useState(false);
+  const [loadingUnfollow, setLoadingUnfollow] = useState(false);
+  const [dialog, setDialog] = useState(false);
+  const userProfile = useSelector(({ api }) => api.userProfile);
+
+  // TODO: A better abstraction to track loader states -> progress | succeed
+  useEffect(() => {
+    if (userProfile.key === key) {
+      setLoading(false);
+      setLoadingUnfollow(false);
+    }
+  }, [key, userProfile]);
+
+  const handleDialogClick = bool => () => setDialog(bool);
+  const handleUnfollowButtonClick = () => {
+    setDialog(false);
+    setLoadingUnfollow(true);
+    dispatch(
+      followAction({
+        namespace: 'profile',
+        key,
+        params: id,
+        payload: { follow: false }
+      })
+    );
+  };
+  const handleFollowButtonClick = () => {
+    setLoading(true);
+    dispatch(
+      followAction({
+        namespace: 'profile',
+        key,
+        params: id,
+        payload: { follow: true }
+      })
+    );
+  };
 
   const editProfile = (
     <Link to="accounts/edit">
@@ -166,11 +205,52 @@ function ProfileNameSection({
       <Settings className={classes.settings} />
     </div>
   );
-  const follow = (
-    <Button variant="contained" color="primary" className={classes.button}>
-      Follow
-    </Button>
-  );
+
+  let followButton;
+  if (ownerIsFollowing) {
+    followButton = (
+      <Button
+        disabled={loadingUnfollow}
+        onClick={handleDialogClick(true)}
+        variant="outlined"
+        className={classes.button}
+      >
+        {loadingUnfollow && <Loader />}Following
+      </Button>
+    );
+  } else if (isFollowingOwner) {
+    followButton = (
+      <Button
+        disabled={loading}
+        variant="contained"
+        color="primary"
+        className={classes.button}
+        onClick={handleFollowButtonClick}
+      >
+        {loading && <Loader color="blue" />}Follow Back
+      </Button>
+    );
+  } else {
+    followButton = (
+      <Button
+        disabled={loading}
+        variant="contained"
+        color="primary"
+        className={classes.button}
+        onClick={handleFollowButtonClick}
+      >
+        {loading && <Loader color="blue" />}
+        Follow
+      </Button>
+    );
+  }
+
+  const unfollowDialogProps = {
+    userName,
+    onClose: handleDialogClick(false),
+    profileImageUrl,
+    handleUnfollowButtonClick
+  };
 
   return (
     <>
@@ -183,7 +263,7 @@ function ProfileNameSection({
               {settings}
             </>
           ) : (
-            follow
+            followButton
           )}
         </section>
       </Hidden>
@@ -193,9 +273,10 @@ function ProfileNameSection({
             <Typography className={classes.userName}>{userName}</Typography>
             {isOwner && settings}
           </div>
-          {isOwner ? editProfile : follow}
+          {isOwner ? editProfile : followButton}
         </section>
       </Hidden>
+      {dialog && <UnfollowDialog {...unfollowDialogProps} />}
     </>
   );
 }

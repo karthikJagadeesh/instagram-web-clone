@@ -3,6 +3,7 @@ import {
   GET_PROFILE_POSTS_SUCCESS,
   GET_SUGGESTIONS_SUCCESS,
   GET_USER_PROFILE_SUCCESS,
+  FOLLOW_SUCESS_SUGGESTIONS,
   FOLLOW_SUCESS,
   GET_ALL_POSTS_SUCCESS
 } from '../constants';
@@ -16,7 +17,8 @@ const initialState = {
   },
   userProfile: {
     data: undefined,
-    status: undefined
+    status: undefined,
+    namespace: undefined
   },
   allPosts: undefined
 };
@@ -55,7 +57,7 @@ export default function(state = initialState, action) {
         profilePosts: undefined
       };
 
-    case FOLLOW_SUCESS: {
+    case FOLLOW_SUCESS_SUGGESTIONS: {
       const suggestions = state.suggestions.data.map(friend => {
         if (friend.id === action.data.id) {
           return { ...friend, following: action.data.following };
@@ -68,6 +70,34 @@ export default function(state = initialState, action) {
         suggestions: {
           data: suggestions,
           key: action.key
+        }
+      };
+    }
+
+    case FOLLOW_SUCESS: {
+      let updater;
+      if (action.data.following) {
+        updater = {
+          followers: state.userProfile.data.followers + 1,
+          ownerIsFollowing: true
+        };
+      } else if (!action.data.following) {
+        updater = {
+          followers: state.userProfile.data.followers - 1,
+          ownerIsFollowing: false
+        };
+      }
+
+      return {
+        ...state,
+        userProfile: {
+          data: {
+            ...state.userProfile.data,
+            ...updater
+          },
+          key: action.key,
+          status: action.data.status,
+          namespace: action.namespace
         }
       };
     }
