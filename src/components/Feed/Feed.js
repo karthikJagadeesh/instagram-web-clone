@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 
-import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import Hidden from '@material-ui/core/Hidden';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 
 import { makeStyles } from '@material-ui/core/styles';
+
+import Post from './Post';
+import { NameCard } from './utils';
 
 import {
   getSuggestionsAction,
@@ -60,83 +61,29 @@ const useAllPostsStyles = makeStyles(theme => ({
   }
 }));
 
-function AllPosts() {
+function AllPosts({ posts }) {
   const classes = useAllPostsStyles();
-  const { userName, fullName, profileImageUrl } = useSelector(
-    state => state.api.user
-  );
+  const user = useSelector(state => state.api.user);
 
   return (
     <div className={classes.container}>
       <div>
-        <AllPostsSkeleton count={5} />
+        {posts.map(post => (
+          <Post post={post} key={post._id} />
+        ))}
       </div>
       <Hidden smDown>
         <div>
           <div className={classes.wrapper}>
             <NameCard
-              userName={userName}
-              fullName={fullName}
-              profileImageUrl={profileImageUrl}
+              userName={user && user.userName}
+              fullName={user && user.fullName}
+              profileImageUrl={user && user.profileImageUrl}
             />
           </div>
           <SuggestionsCard side={true} />
         </div>
       </Hidden>
-    </div>
-  );
-}
-
-const useNameCardStyles = makeStyles({
-  avatar: {
-    width: 44,
-    height: 44
-  },
-  typography: {
-    textOverflow: 'ellipsis',
-    overflow: 'hidden'
-  },
-  wrapper: {
-    display: 'grid',
-    gridAutoFlow: 'column',
-    gridTemplateColumns: '44px auto',
-    gridGap: 12,
-    alignItems: 'center'
-  },
-  nameWrapper: {
-    overflow: 'hidden',
-    whiteSpace: 'nowrap'
-  }
-});
-
-function NameCard({ userName, fullName, profileImageUrl }) {
-  const classes = useNameCardStyles();
-
-  const avatarProps = {
-    alt: 'user-image',
-    src: profileImageUrl,
-    className: classes.avatar
-  };
-
-  return (
-    <div className={classes.wrapper}>
-      <Link to={`${userName}`}>
-        <Avatar {...avatarProps} />
-      </Link>
-      <div className={classes.nameWrapper}>
-        <Link to={`${userName}`}>
-          <Typography variant="subtitle2" className={classes.typography}>
-            {userName}
-          </Typography>
-        </Link>
-        <Typography
-          color="textSecondary"
-          variant="body2"
-          className={classes.typography}
-        >
-          {fullName}
-        </Typography>
-      </div>
     </div>
   );
 }
