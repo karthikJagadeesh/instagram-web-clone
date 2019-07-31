@@ -50,11 +50,21 @@ const useAllPostsStyles = makeStyles(theme => ({
       gridTemplateColumns: 'minmax(auto, 600px)',
       justifyContent: 'center'
     }
+  },
+
+  wrapper: {
+    display: 'grid',
+    margin: '0px 28px 24px',
+    justifyContent: 'center',
+    gridTemplateColumns: 'minmax(auto, 300px)'
   }
 }));
 
 function AllPosts() {
   const classes = useAllPostsStyles();
+  const { userName, fullName, profileImageUrl } = useSelector(
+    state => state.api.user
+  );
 
   return (
     <div className={classes.container}>
@@ -63,9 +73,70 @@ function AllPosts() {
       </div>
       <Hidden smDown>
         <div>
+          <div className={classes.wrapper}>
+            <NameCard
+              userName={userName}
+              fullName={fullName}
+              profileImageUrl={profileImageUrl}
+            />
+          </div>
           <SuggestionsCard side={true} />
         </div>
       </Hidden>
+    </div>
+  );
+}
+
+const useNameCardStyles = makeStyles({
+  avatar: {
+    width: 44,
+    height: 44
+  },
+  typography: {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden'
+  },
+  wrapper: {
+    display: 'grid',
+    gridAutoFlow: 'column',
+    gridTemplateColumns: '44px auto',
+    gridGap: 12,
+    alignItems: 'center'
+  },
+  nameWrapper: {
+    overflow: 'hidden',
+    whiteSpace: 'nowrap'
+  }
+});
+
+function NameCard({ userName, fullName, profileImageUrl }) {
+  const classes = useNameCardStyles();
+
+  const avatarProps = {
+    alt: 'user-image',
+    src: profileImageUrl,
+    className: classes.avatar
+  };
+
+  return (
+    <div className={classes.wrapper}>
+      <Link to={`${userName}`}>
+        <Avatar {...avatarProps} />
+      </Link>
+      <div className={classes.nameWrapper}>
+        <Link to={`${userName}`}>
+          <Typography variant="subtitle2" className={classes.typography}>
+            {userName}
+          </Typography>
+        </Link>
+        <Typography
+          color="textSecondary"
+          variant="body2"
+          className={classes.typography}
+        >
+          {fullName}
+        </Typography>
+      </div>
     </div>
   );
 }
@@ -181,29 +252,10 @@ const useSuggestionsCardItemStyles = makeStyles({
     alignItems: 'center',
     padding: '8px 16px'
   },
-  wrapper: {
-    display: 'grid',
-    gridAutoFlow: 'column',
-    gridTemplateColumns: '44px auto',
-    gridGap: 12,
-    alignItems: 'center'
-  },
+
   button: {
     height: 30,
     padding: '0px 16px'
-  },
-  avatar: {
-    width: 44,
-    height: 44
-  },
-
-  typography: {
-    textOverflow: 'ellipsis',
-    overflow: 'hidden'
-  },
-  nameWrapper: {
-    overflow: 'hidden',
-    whiteSpace: 'nowrap'
   }
 });
 
@@ -238,11 +290,6 @@ function SuggestionsCardItem({
     dispatch(followAction({ key, params: id, payload: { follow: false } }));
   };
 
-  const avatarProps = {
-    alt: 'user-image',
-    src: profileImageUrl,
-    className: classes.avatar
-  };
   const followButtonProps = {
     disabled: loading,
     variant: !side ? 'contained' : 'text',
@@ -275,25 +322,11 @@ function SuggestionsCardItem({
 
   return (
     <div className={classes.card}>
-      <div className={classes.wrapper}>
-        <Link to={`${userName}`}>
-          <Avatar {...avatarProps} />
-        </Link>
-        <div className={classes.nameWrapper}>
-          <Link to={`${userName}`}>
-            <Typography variant="subtitle2" className={classes.typography}>
-              {userName}
-            </Typography>
-          </Link>
-          <Typography
-            color="textSecondary"
-            variant="body2"
-            className={classes.typography}
-          >
-            {fullName}
-          </Typography>
-        </div>
-      </div>
+      <NameCard
+        profileImageUrl={profileImageUrl}
+        userName={userName}
+        fullName={fullName}
+      />
       {following ? followingButton : followButton}
       {dialog && <UnfollowDialog {...unfollowDialogProps} />}
     </div>
