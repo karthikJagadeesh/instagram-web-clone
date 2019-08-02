@@ -228,7 +228,7 @@ const useTopNavigationStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'center',
     gridTemplateColumns: 'minmax(auto, 1010px)',
-    padding: 12
+    padding: '12px 16px'
   },
   section: {
     display: 'grid',

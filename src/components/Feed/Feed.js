@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Button from '@material-ui/core/Button';
@@ -8,7 +8,6 @@ import Typography from '@material-ui/core/Typography';
 
 import { makeStyles } from '@material-ui/core/styles';
 
-import Post from './Post';
 import { NameCard } from './utils';
 
 import {
@@ -21,6 +20,8 @@ import { SuggestionsSkeleton, AllPostsSkeleton } from '../utils/skeleton';
 import { generateKey, Loader, LinearLoader, UnfollowDialog } from '../utils';
 
 import LoadingPage from '../LoadingPage';
+
+const Post = lazy(() => import('./Post'));
 
 export default function Feed() {
   const dispatch = useDispatch();
@@ -69,7 +70,9 @@ function AllPosts({ posts }) {
     <div className={classes.container}>
       <div>
         {posts.map(post => (
-          <Post post={post} key={post._id} />
+          <Suspense fallback={<AllPostsSkeleton count={5} />} key={post.id}>
+            <Post post={post} />
+          </Suspense>
         ))}
       </div>
       <Hidden smDown>
