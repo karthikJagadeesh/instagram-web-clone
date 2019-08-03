@@ -1,4 +1,5 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { distanceInWordsStrict } from 'date-fns';
 
@@ -11,93 +12,89 @@ import { makeStyles } from '@material-ui/core/styles';
 import IconsSpriteSheet1 from '../../images/icons-spritesheet.png';
 import IconsSpriteSheet2 from '../../images/icons-spritesheet2.png';
 
+import { likeAction } from '../../redux/actions/api';
+
 import { NameCard } from './utils';
 import { Typography, Button } from '@material-ui/core';
 
-const usePostStyles = makeStyles(theme => {
-  const commonProps = {
-    backgroundImage: `url(${IconsSpriteSheet2})`,
-    backgroundSize: '355px 344px',
+const commonProps = {
+  backgroundImage: `url(${IconsSpriteSheet2})`,
+  backgroundSize: '355px 344px',
+  backgroundRepeat: 'no-repeat',
+  height: 24,
+  width: 24,
+  justifySelf: 'center',
+  '&:hover': {
+    cursor: 'pointer'
+  }
+};
+const usePostStyles = makeStyles(theme => ({
+  article: {
+    border: '1px solid #e6e6e6',
+    background: '#ffffff',
+    marginBottom: 60,
+    [theme.breakpoints.down('xs')]: {
+      border: 'unset',
+      marginBottom: 0
+    }
+  },
+
+  nameCardWrapper: {
+    display: 'grid',
+    gridAutoFlow: 'column',
+    gridTemplateColumns: 'auto minmax(auto, 20px)',
+    gridGap: 10,
+    alignItems: 'center',
+    padding: 16
+  },
+  icon: {
+    backgroundImage: `url(${IconsSpriteSheet1})`,
+    backgroundPosition: '-217px -170px',
+    backgroundSize: '503px 516px',
     backgroundRepeat: 'no-repeat',
     height: 24,
-    width: 24,
+    width: 18,
     justifySelf: 'center',
     '&:hover': {
       cursor: 'pointer'
     }
-  };
+  },
 
-  return {
-    article: {
-      border: '1px solid #e6e6e6',
-      background: '#ffffff',
-      marginBottom: 60,
-      [theme.breakpoints.down('xs')]: {
-        border: 'unset',
-        marginBottom: 0
-      }
-    },
+  image: {
+    width: '100%'
+  },
 
-    nameCardWrapper: {
-      display: 'grid',
-      gridAutoFlow: 'column',
-      gridTemplateColumns: 'auto minmax(auto, 20px)',
-      gridGap: 10,
-      alignItems: 'center',
-      padding: 16
-    },
-    icon: {
-      backgroundImage: `url(${IconsSpriteSheet1})`,
-      backgroundPosition: '-217px -170px',
-      backgroundSize: '503px 516px',
-      backgroundRepeat: 'no-repeat',
-      height: 24,
-      width: 18,
-      justifySelf: 'center',
-      '&:hover': {
-        cursor: 'pointer'
-      }
-    },
+  iconWrapper: {
+    display: 'grid',
+    gridAutoFlow: 'column',
+    gridTemplateColumns: '24px 24px 24px minmax(24px, auto)',
+    gridGap: 16,
+    padding: '6px 0px'
+  },
 
-    image: {
-      width: '100%'
-    },
-
-    iconWrapper: {
-      display: 'grid',
-      gridAutoFlow: 'column',
-      gridTemplateColumns: '24px 24px 24px minmax(24px, auto)',
-      gridGap: 16,
-      padding: '6px 0px'
-    },
-    likes: {
-      ...commonProps,
-      backgroundPosition: '-275px -269px'
-    },
-    comments: {
-      ...commonProps,
-      backgroundPosition: '-117px -97px'
-    },
-    share: {
-      ...commonProps,
-      backgroundPosition: '-175px -320px'
-    },
-    save: {
-      ...commonProps,
-      backgroundPosition: '-48px -320px',
-      justifySelf: 'right'
-    },
-    container: {
-      padding: '0px 16px 8px'
-    },
-    typography: {
-      fontWeight: 600
-    },
-    distance: {
-      fontSize: 10
-    }
-  };
-});
+  comments: {
+    ...commonProps,
+    backgroundPosition: '-117px -97px'
+  },
+  share: {
+    ...commonProps,
+    backgroundPosition: '-175px -320px'
+  },
+  save: {
+    ...commonProps,
+    backgroundPosition: '-48px -320px',
+    justifySelf: 'right'
+  },
+  container: {
+    padding: '0px 16px 8px'
+  },
+  typography: {
+    fontWeight: 600
+  },
+  distance: {
+    fontSize: 10
+  }
+}));
 
 export default function Post({
   post: {
@@ -105,7 +102,9 @@ export default function Post({
     owner: { userName, fullName, profileImageUrl },
     likes,
     caption,
-    postedAt
+    postedAt,
+    ownerHasLiked,
+    id
   }
 }) {
   const classes = usePostStyles();
@@ -140,7 +139,7 @@ export default function Post({
   );
   const likesSection = (
     <Typography variant="subtitle2" className={classes.typography}>
-      {likes} likes
+      {likes === 1 ? '1 like' : `${likes} likes`}
     </Typography>
   );
 
@@ -155,7 +154,7 @@ export default function Post({
       </div>
       <div className={classes.container}>
         <div className={classes.iconWrapper}>
-          <div className={classes.likes} />
+          <Like id={id} ownerHasLiked={ownerHasLiked} />
           <div className={classes.comments} />
           <div className={classes.share} />
           <div className={classes.save} />
@@ -171,6 +170,32 @@ export default function Post({
       </Hidden>
     </article>
   );
+}
+
+const useLikeStyles = makeStyles({
+  like: {
+    ...commonProps,
+    backgroundPosition: '-275px -269px'
+  },
+  liked: {
+    ...commonProps,
+    backgroundPosition: '-250px -269px'
+  }
+});
+
+function Like({ id, ownerHasLiked }) {
+  const classes = useLikeStyles();
+  const dispatch = useDispatch();
+  const className = ownerHasLiked ? classes.liked : classes.like;
+
+  const handleLikeClick = () =>
+    dispatch(likeAction({ params: { id, type: 'like' } }));
+  const handleUnlikeClick = () =>
+    dispatch(likeAction({ params: { id, type: 'unlike' } }));
+
+  const onClick = ownerHasLiked ? handleUnlikeClick : handleLikeClick;
+
+  return <div className={className} onClick={onClick} />;
 }
 
 const useCommentStyles = makeStyles({

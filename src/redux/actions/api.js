@@ -8,7 +8,8 @@ import {
   GET_SUGGESTIONS,
   GET_USER_PROFILE,
   FOLLOW,
-  GET_ALL_POSTS
+  GET_ALL_POSTS,
+  LIKE
 } from '../constants';
 
 export const userActions = {
@@ -71,4 +72,10 @@ export const followAction = ({ params, payload, key, namespace = '' }) => ({
   payload,
   key,
   namespace
+});
+
+export const likeAction = ({ params }) => ({
+  type: LIKE,
+  path: `/post/${params.id}/${params.type}`,
+  params
 });

@@ -1,4 +1,12 @@
-import { apply, put, select, takeEvery } from 'redux-saga/effects';
+import {
+  actionChannel,
+  apply,
+  put,
+  select,
+  take,
+  call,
+  takeEvery
+} from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 
 import { userActions } from '../actions/api';
@@ -26,7 +34,10 @@ import {
   FOLLOW_SUCESS,
   FOLLOW_SUCESS_SUGGESTIONS,
   GET_ALL_POSTS,
-  GET_ALL_POSTS_SUCCESS
+  GET_ALL_POSTS_SUCCESS,
+  LIKE,
+  LIKE_POST_PROGRESS,
+  UNLIKE_POST_PROGRESS
 } from '../constants';
 
 function* getUser({ path, params }) {
@@ -178,6 +189,33 @@ function* getAllPosts({ path }) {
   }
 }
 
+function* likePost({ path, params }) {
+  try {
+    if (params.type === 'like') {
+      yield apply(client, client.post, [path, '']);
+    } else if (params.type === 'unlike') {
+      yield apply(client, client.post, [path, '']);
+    }
+    return;
+  } catch ({ error }) {
+    console.error(error);
+    yield put({
+      type: SHOW_MESSAGE,
+      message: 'Failed to complete this action.'
+    });
+    return;
+  }
+}
+
+function* updateLikeOnlyOnRedux({ params }) {
+  if (params.type === 'like') {
+    yield put({ type: LIKE_POST_PROGRESS, id: params.id });
+  } else if (params.type === 'unlike') {
+    yield put({ type: UNLIKE_POST_PROGRESS, id: params.id });
+  }
+  return;
+}
+
 export function* apiSaga() {
   yield takeEvery(GET_USER, getUser);
   yield takeEvery(UPDATE_USER, updateUser);
@@ -195,4 +233,11 @@ export function* apiSaga() {
   yield takeEvery(FOLLOW, follow);
 
   yield takeEvery(GET_ALL_POSTS, getAllPosts);
+
+  yield takeEvery(LIKE, updateLikeOnlyOnRedux);
+  const likePostChannel = yield actionChannel(LIKE);
+  while (true) {
+    const action = yield take(likePostChannel);
+    yield call(likePost, action);
+  }
 }

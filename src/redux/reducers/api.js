@@ -5,7 +5,9 @@ import {
   GET_USER_PROFILE_SUCCESS,
   FOLLOW_SUCESS_SUGGESTIONS,
   FOLLOW_SUCESS,
-  GET_ALL_POSTS_SUCCESS
+  GET_ALL_POSTS_SUCCESS,
+  LIKE_POST_PROGRESS,
+  UNLIKE_POST_PROGRESS
 } from '../constants';
 
 const initialState = {
@@ -106,6 +108,44 @@ export default function(state = initialState, action) {
       return {
         ...state,
         allPosts: action.data
+      };
+    }
+
+    case LIKE_POST_PROGRESS: {
+      const id = action.id;
+      const allPosts = state.allPosts.map(post => {
+        if (post.id === id) {
+          return {
+            ...post,
+            likes: post.likes + 1,
+            ownerHasLiked: true
+          };
+        }
+        return post;
+      });
+
+      return {
+        ...state,
+        allPosts
+      };
+    }
+
+    case UNLIKE_POST_PROGRESS: {
+      const id = action.id;
+      const allPosts = state.allPosts.map(post => {
+        if (post.id === id) {
+          return {
+            ...post,
+            likes: post.likes - 1,
+            ownerHasLiked: false
+          };
+        }
+        return post;
+      });
+
+      return {
+        ...state,
+        allPosts
       };
     }
 
