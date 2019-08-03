@@ -172,14 +172,34 @@ export default function Post({
   );
 }
 
+const commonKeyFramesProps = {
+  '0%': { transform: 'scale(1)' },
+  '25%': { transform: 'scale(1.2)' },
+  '50%': { transform: 'scale(0.95)' },
+  '100%': { transform: 'scale(1)' }
+};
+const commonAnimationProps = {
+  animationTimingFunction: 'ease-in-out',
+  transform: 'scale(1)'
+};
 const useLikeStyles = makeStyles({
   like: {
     ...commonProps,
-    backgroundPosition: '-275px -269px'
+    backgroundPosition: '-275px -269px',
+    animation: '$like-button-animation 0.45s',
+    ...commonAnimationProps
   },
   liked: {
     ...commonProps,
-    backgroundPosition: '-250px -269px'
+    backgroundPosition: '-250px -269px',
+    animation: '$liked-button-animation 0.45s',
+    ...commonAnimationProps
+  },
+  '@keyframes like-button-animation': {
+    ...commonKeyFramesProps
+  },
+  '@keyframes liked-button-animation': {
+    ...commonKeyFramesProps
   }
 });
 
