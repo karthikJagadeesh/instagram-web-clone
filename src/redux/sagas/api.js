@@ -37,8 +37,50 @@ import {
   GET_ALL_POSTS_SUCCESS,
   LIKE,
   LIKE_POST_PROGRESS,
-  UNLIKE_POST_PROGRESS
+  UNLIKE_POST_PROGRESS,
+  GET_LIKES,
+  GET_LIKES_SUCCESS,
+  FOLLOW_SUCESS_GENERIC
 } from '../constants';
+
+export function* apiSaga() {
+  yield takeEvery(GET_USER, getUser);
+  yield takeEvery(UPDATE_USER, updateUser);
+
+  yield takeEvery(CHANGE_PROFILE_PIC, changeProfilePic);
+  yield takeEvery(CHANGE_PASSWORD, changePassword);
+
+  yield takeEvery(UPLOAD_POST, uploadPost);
+  yield takeEvery(GET_PROFILE_POSTS, getProfilePosts);
+
+  yield takeEvery(GET_SUGGESTIONS, getSuggestions);
+
+  yield takeEvery(GET_USER_PROFILE, getUserProfile);
+
+  yield takeEvery(FOLLOW, follow);
+
+  yield takeEvery(GET_ALL_POSTS, getAllPosts);
+
+  yield takeEvery(GET_LIKES, getLikes);
+
+  yield takeEvery(LIKE, updateLikeOnlyOnRedux);
+  const likePostChannel = yield actionChannel(LIKE);
+  while (true) {
+    const action = yield take(likePostChannel);
+    yield call(likePost, action);
+  }
+}
+
+function* getLikes({ path, key, params }) {
+  try {
+    const { data } = yield apply(client, client.get, [path, '']);
+    yield put({ type: GET_LIKES_SUCCESS, data, key, params });
+    return;
+  } catch ({ error }) {
+    console.error(error);
+    return;
+  }
+}
 
 function* getUser({ path, params }) {
   try {
@@ -147,9 +189,9 @@ function* getUserProfile({ path, params, key }) {
   }
 }
 
-function* follow({ path, params, payload, key, namespace }) {
+function* follow({ path, params, payload, key, namespace, postId }) {
   try {
-    const { following, status } = yield apply(client, client.post, [
+    const { ownerIsFollowing, status } = yield apply(client, client.post, [
       path,
       params,
       payload
@@ -158,14 +200,22 @@ function* follow({ path, params, payload, key, namespace }) {
     if (namespace === 'profile') {
       yield put({
         type: FOLLOW_SUCESS,
-        data: { status, following },
+        data: { status, ownerIsFollowing },
         key,
         namespace
+      });
+    } else if (namespace === 'generic') {
+      yield put({
+        type: FOLLOW_SUCESS_GENERIC,
+        data: { status, ownerIsFollowing, id: params },
+        key,
+        namespace,
+        postId
       });
     } else {
       yield put({
         type: FOLLOW_SUCESS_SUGGESTIONS,
-        data: { status, following, id: params },
+        data: { status, ownerIsFollowing, id: params },
         key
       });
     }
@@ -214,30 +264,4 @@ function* updateLikeOnlyOnRedux({ params }) {
     yield put({ type: UNLIKE_POST_PROGRESS, id: params.id });
   }
   return;
-}
-
-export function* apiSaga() {
-  yield takeEvery(GET_USER, getUser);
-  yield takeEvery(UPDATE_USER, updateUser);
-
-  yield takeEvery(CHANGE_PROFILE_PIC, changeProfilePic);
-  yield takeEvery(CHANGE_PASSWORD, changePassword);
-
-  yield takeEvery(UPLOAD_POST, uploadPost);
-  yield takeEvery(GET_PROFILE_POSTS, getProfilePosts);
-
-  yield takeEvery(GET_SUGGESTIONS, getSuggestions);
-
-  yield takeEvery(GET_USER_PROFILE, getUserProfile);
-
-  yield takeEvery(FOLLOW, follow);
-
-  yield takeEvery(GET_ALL_POSTS, getAllPosts);
-
-  yield takeEvery(LIKE, updateLikeOnlyOnRedux);
-  const likePostChannel = yield actionChannel(LIKE);
-  while (true) {
-    const action = yield take(likePostChannel);
-    yield call(likePost, action);
-  }
 }

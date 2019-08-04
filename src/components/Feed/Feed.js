@@ -128,7 +128,7 @@ function SuggestionsCard({ side = false }) {
 
   useEffect(() => {
     if (data && !side) {
-      const isFollowingAnyone = data.some(friend => friend.following);
+      const isFollowingAnyone = data.some(friend => friend.ownerIsFollowing);
       if (isFollowingAnyone) {
         setButton(true);
       } else {
@@ -171,13 +171,15 @@ function SuggestionsCard({ side = false }) {
         )}
         {data ? (
           data.map(friend => {
-            const suggestionsCardItemProps = {
+            const customUsersListCardItemProps = {
               friend,
               key: friend.id,
-              suggestions,
+              list: suggestions,
               side
             };
-            return <SuggestionsCardItem {...suggestionsCardItemProps} />;
+            return (
+              <CustomUsersListCardItem {...customUsersListCardItemProps} />
+            );
           })
         ) : (
           <SuggestionsSkeleton count={12} />
@@ -193,7 +195,7 @@ function SuggestionsCard({ side = false }) {
   );
 }
 
-const useSuggestionsCardItemStyles = makeStyles({
+const useCustomUsersListCardItemStyles = makeStyles({
   card: {
     display: 'grid',
     gridAutoFlow: 'column',
@@ -209,12 +211,22 @@ const useSuggestionsCardItemStyles = makeStyles({
   }
 });
 
-function SuggestionsCardItem({
-  friend: { id, profileImageUrl, userName, fullName, following },
-  suggestions,
-  side
+export function CustomUsersListCardItem({
+  friend: {
+    id,
+    profileImageUrl,
+    userName,
+    fullName,
+    ownerIsFollowing,
+    isOwner = false,
+    isFollowingOwner = false
+  },
+  list,
+  side,
+  namespace = '',
+  postId
 }) {
-  const classes = useSuggestionsCardItemStyles();
+  const classes = useCustomUsersListCardItemStyles();
   const dispatch = useDispatch();
   const { current: key } = useRef(generateKey());
   const [loading, setLoading] = useState(false);
@@ -222,22 +234,38 @@ function SuggestionsCardItem({
   const [dialog, setDialog] = useState(false);
 
   useEffect(() => {
-    if (suggestions.key === key) {
+    if (list.key === key) {
       setLoading(false);
       setLoadingUnfollow(false);
     }
-  }, [key, suggestions]);
+  }, [key, list]);
 
   const handleDialogClick = bool => () => setDialog(bool);
 
   const handleFollowButtonClick = () => {
     setLoading(true);
-    dispatch(followAction({ key, params: id, payload: { follow: true } }));
+    dispatch(
+      followAction({
+        key,
+        params: id,
+        payload: { follow: true },
+        namespace,
+        postId
+      })
+    );
   };
   const handleUnfollowButtonClick = () => {
     setDialog(false);
     setLoadingUnfollow(true);
-    dispatch(followAction({ key, params: id, payload: { follow: false } }));
+    dispatch(
+      followAction({
+        key,
+        params: id,
+        payload: { follow: false },
+        namespace,
+        postId
+      })
+    );
   };
 
   const followButtonProps = {
@@ -266,9 +294,15 @@ function SuggestionsCardItem({
   );
   const followButton = (
     <Button {...followButtonProps}>
-      {loading && <Loader color="blue" />}Follow
+      {loading && <Loader color="blue" />}
+      {isFollowingOwner ? 'Follow Back' : 'Follow'}
     </Button>
   );
+
+  let button;
+  if (!isOwner) {
+    button = ownerIsFollowing ? followingButton : followButton;
+  }
 
   return (
     <div className={classes.card}>
@@ -277,7 +311,7 @@ function SuggestionsCardItem({
         userName={userName}
         fullName={fullName}
       />
-      {following ? followingButton : followButton}
+      {button}
       {dialog && <UnfollowDialog {...unfollowDialogProps} />}
     </div>
   );

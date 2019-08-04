@@ -30,7 +30,7 @@ const useSkeletonStyles = makeStyles({
   text: {
     margin: '4px 0',
     height: 8,
-    width: 120,
+    maxWidth: 120,
     background: '#e8e8e8',
     borderRadius: 6
   },

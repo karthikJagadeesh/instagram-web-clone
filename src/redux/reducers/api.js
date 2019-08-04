@@ -7,7 +7,9 @@ import {
   FOLLOW_SUCESS,
   GET_ALL_POSTS_SUCCESS,
   LIKE_POST_PROGRESS,
-  UNLIKE_POST_PROGRESS
+  UNLIKE_POST_PROGRESS,
+  GET_LIKES_SUCCESS,
+  FOLLOW_SUCESS_GENERIC
 } from '../constants';
 
 const initialState = {
@@ -22,7 +24,11 @@ const initialState = {
     status: undefined,
     namespace: undefined
   },
-  allPosts: undefined
+  allPosts: undefined,
+  customUsersList: {
+    data: undefined,
+    key: undefined
+  }
 };
 
 export default function(state = initialState, action) {
@@ -60,11 +66,10 @@ export default function(state = initialState, action) {
       };
 
     case FOLLOW_SUCESS_SUGGESTIONS: {
-      const suggestions = state.suggestions.data.map(friend => {
-        if (friend.id === action.data.id) {
-          return { ...friend, following: action.data.following };
-        }
-        return friend;
+      const suggestions = suggestionsUpdater({
+        id: action.data.id,
+        state,
+        ownerIsFollowing: action.data.ownerIsFollowing
       });
 
       return {
@@ -76,14 +81,43 @@ export default function(state = initialState, action) {
       };
     }
 
+    case FOLLOW_SUCESS_GENERIC: {
+      const list = state.customUsersList.data[action.postId].map(friend => {
+        if (friend.id === action.data.id) {
+          return { ...friend, ownerIsFollowing: action.data.ownerIsFollowing };
+        }
+        return friend;
+      });
+      const suggestions = suggestionsUpdater({
+        id: action.data.id,
+        state,
+        ownerIsFollowing: action.data.ownerIsFollowing
+      });
+
+      return {
+        ...state,
+        customUsersList: {
+          data: {
+            ...state.customUsersList.data,
+            [action.postId]: list
+          },
+          key: action.key
+        },
+        suggestions: {
+          ...state.suggestions,
+          data: suggestions
+        }
+      };
+    }
+
     case FOLLOW_SUCESS: {
       let updater;
-      if (action.data.following) {
+      if (action.data.ownerIsFollowing) {
         updater = {
           followers: state.userProfile.data.followers + 1,
           ownerIsFollowing: true
         };
-      } else if (!action.data.following) {
+      } else if (!action.data.ownerIsFollowing) {
         updater = {
           followers: state.userProfile.data.followers - 1,
           ownerIsFollowing: false
@@ -149,7 +183,29 @@ export default function(state = initialState, action) {
       };
     }
 
+    case GET_LIKES_SUCCESS: {
+      return {
+        ...state,
+        customUsersList: {
+          data: {
+            ...state.customUsersList.data,
+            [action.params.id]: action.data
+          },
+          key: action.key
+        }
+      };
+    }
+
     default:
       return state;
   }
+}
+
+function suggestionsUpdater({ state, id, ownerIsFollowing }) {
+  return state.suggestions.data.map(friend => {
+    if (friend.id === id) {
+      return { ...friend, ownerIsFollowing };
+    }
+    return friend;
+  });
 }

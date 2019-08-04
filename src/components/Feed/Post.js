@@ -1,21 +1,26 @@
-import React from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { distanceInWordsStrict } from 'date-fns';
 
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
 import Divider from '@material-ui/core/Divider';
 import Hidden from '@material-ui/core/Hidden';
 import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
+import Zoom from '@material-ui/core/Zoom';
 
 import { makeStyles } from '@material-ui/core/styles';
 
 import IconsSpriteSheet1 from '../../images/icons-spritesheet.png';
 import IconsSpriteSheet2 from '../../images/icons-spritesheet2.png';
 
-import { likeAction } from '../../redux/actions/api';
+import { likeAction, getLikesAction } from '../../redux/actions/api';
 
 import { NameCard } from './utils';
-import { Typography, Button } from '@material-ui/core';
+import { SuggestionsSkeleton } from '../utils/skeleton';
+import { CustomUsersListCardItem } from './Feed';
 
 const commonProps = {
   backgroundImage: `url(${IconsSpriteSheet2})`,
@@ -137,11 +142,6 @@ export default function Post({
       </Typography>
     </Link>
   );
-  const likesSection = (
-    <Typography variant="subtitle2" className={classes.typography}>
-      {likes === 1 ? '1 like' : `${likes} likes`}
-    </Typography>
-  );
 
   return (
     <article className={classes.article}>
@@ -154,12 +154,12 @@ export default function Post({
       </div>
       <div className={classes.container}>
         <div className={classes.iconWrapper}>
-          <Like id={id} ownerHasLiked={ownerHasLiked} />
+          <LikeButton id={id} ownerHasLiked={ownerHasLiked} />
           <div className={classes.comments} />
           <div className={classes.share} />
           <div className={classes.save} />
         </div>
-        {likesSection}
+        <DisplayLikes likes={likes} id={id} />
         {userNameSection}
         {captionSection}
         {distanceSection}
@@ -169,6 +169,105 @@ export default function Post({
         <Comment />
       </Hidden>
     </article>
+  );
+}
+
+const useDisplayLikesStyles = makeStyles({
+  typography: {
+    fontWeight: 600
+  },
+  span: {
+    '&:hover': {
+      cursor: 'pointer'
+    }
+  }
+});
+
+function DisplayLikes({ likes, id }) {
+  const classes = useDisplayLikesStyles();
+  const [dialog, setDialog] = useState(false);
+
+  const handleDialogClick = bool => () => setDialog(bool);
+
+  return (
+    <>
+      <Typography variant="subtitle2" className={classes.typography}>
+        <span
+          onClick={likes ? handleDialogClick(true) : undefined}
+          className={classes.span}
+        >
+          {likes === 1 ? '1 like' : `${likes} likes`}
+        </span>
+      </Typography>
+      {dialog && (
+        <LikesDialog likes={likes} id={id} onClose={handleDialogClick(false)} />
+      )}
+    </>
+  );
+}
+
+const useLikeDialogStyles = makeStyles({
+  cancelButton: {
+    ...commonProps,
+    backgroundPosition: '-224px -319px'
+  },
+
+  titleContainer: {
+    display: 'grid',
+    gridAutoFlow: 'column',
+    gridTemplateColumns: '50px auto 50px',
+    padding: '6px 0px',
+    alignItems: 'center'
+  },
+
+  dialogPaperWidth: {
+    maxWidth: 360
+  }
+});
+
+function LikesDialog({ likes, onClose, id }) {
+  const classes = useLikeDialogStyles();
+  const dispatch = useDispatch();
+  const list = useSelector(state => state.api.customUsersList);
+  const friends = list.data && list.data[id];
+
+  useEffect(() => {
+    dispatch(getLikesAction({ params: { id } }));
+  }, [dispatch, id]);
+
+  const dialogProps = {
+    open: true,
+    onClose,
+    classes: { paperWidthFalse: classes.dialogPaperWidth },
+    maxWidth: false,
+    TransitionComponent: Zoom
+  };
+  const count = likes > 4 ? 4 : likes;
+
+  return (
+    <Dialog {...dialogProps}>
+      <div className={classes.titleContainer}>
+        <div />
+        <Typography variant="h6" align="center">
+          Likes
+        </Typography>
+        <div className={classes.cancelButton} onClick={onClose} />
+      </div>
+      <Divider />
+      {friends ? (
+        friends.map(friend => (
+          <CustomUsersListCardItem
+            key={friend.id}
+            friend={friend}
+            namespace="generic"
+            list={list}
+            postId={id}
+          />
+        ))
+      ) : (
+        <SuggestionsSkeleton count={count} />
+      )}
+    </Dialog>
   );
 }
 
@@ -182,7 +281,7 @@ const commonAnimationProps = {
   animationTimingFunction: 'ease-in-out',
   transform: 'scale(1)'
 };
-const useLikeStyles = makeStyles({
+const useLikeButtonStyles = makeStyles({
   like: {
     ...commonProps,
     backgroundPosition: '-275px -269px',
@@ -195,16 +294,12 @@ const useLikeStyles = makeStyles({
     animation: '$liked-button-animation 0.45s',
     ...commonAnimationProps
   },
-  '@keyframes like-button-animation': {
-    ...commonKeyFramesProps
-  },
-  '@keyframes liked-button-animation': {
-    ...commonKeyFramesProps
-  }
+  '@keyframes like-button-animation': commonKeyFramesProps,
+  '@keyframes liked-button-animation': commonKeyFramesProps
 });
 
-function Like({ id, ownerHasLiked }) {
-  const classes = useLikeStyles();
+function LikeButton({ id, ownerHasLiked }) {
+  const classes = useLikeButtonStyles();
   const dispatch = useDispatch();
   const className = ownerHasLiked ? classes.liked : classes.like;
 

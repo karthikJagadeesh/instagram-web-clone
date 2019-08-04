@@ -9,7 +9,8 @@ import {
   GET_USER_PROFILE,
   FOLLOW,
   GET_ALL_POSTS,
-  LIKE
+  LIKE,
+  GET_LIKES
 } from '../constants';
 
 export const userActions = {
@@ -65,17 +66,31 @@ export const getUserProfileAction = ({ params, key }) => ({
   key
 });
 
-export const followAction = ({ params, payload, key, namespace = '' }) => ({
+export const followAction = ({
+  params,
+  payload,
+  key,
+  namespace = '',
+  postId
+}) => ({
   type: FOLLOW,
   path: '/friendship',
   params,
   payload,
   key,
-  namespace
+  namespace,
+  postId
 });
 
 export const likeAction = ({ params }) => ({
   type: LIKE,
   path: `/post/${params.id}/${params.type}`,
+  params
+});
+
+export const getLikesAction = ({ params, key }) => ({
+  type: GET_LIKES,
+  path: `/post/${params.id}/likes`,
+  key,
   params
 });
