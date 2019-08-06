@@ -9,7 +9,7 @@ import {
 } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 
-import { userActions } from '../actions/api';
+import { userActions, getAllPostsAction } from '../actions/api';
 
 import client from '../singletons/client';
 
@@ -197,31 +197,51 @@ function* follow({ path, params, payload, key, namespace, postId }) {
       payload
     ]);
 
-    if (namespace === 'profile') {
-      yield put({
-        type: FOLLOW_SUCESS,
-        data: { status, ownerIsFollowing },
-        key,
-        namespace
-      });
-    } else if (namespace === 'generic') {
-      yield put({
-        type: FOLLOW_SUCESS_GENERIC,
-        data: { status, ownerIsFollowing, id: params },
-        key,
-        namespace,
-        postId
-      });
-    } else {
-      yield put({
-        type: FOLLOW_SUCESS_SUGGESTIONS,
-        data: { status, ownerIsFollowing, id: params },
-        key
-      });
+    switch (namespace) {
+      case 'profile': {
+        yield put({
+          type: FOLLOW_SUCESS,
+          data: { status, ownerIsFollowing },
+          key,
+          namespace
+        });
+        break;
+      }
+
+      case 'generic': {
+        yield put({
+          type: FOLLOW_SUCESS_GENERIC,
+          data: { status, ownerIsFollowing, id: params },
+          key,
+          namespace,
+          postId
+        });
+        yield put(getAllPostsAction());
+        break;
+      }
+
+      case 'post': {
+        yield put({
+          type: FOLLOW_SUCESS_SUGGESTIONS,
+          data: { status, ownerIsFollowing, id: params },
+          key
+        });
+        yield put(getAllPostsAction());
+        break;
+      }
+
+      default: {
+        yield put({
+          type: FOLLOW_SUCESS_SUGGESTIONS,
+          data: { status, ownerIsFollowing, id: params },
+          key
+        });
+        break;
+      }
     }
+
     const id = yield select(({ api }) => api.user.id);
     yield put(userActions.get(id));
-    return;
   } catch ({ error }) {
     console.error(error);
     return;

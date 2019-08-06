@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { distanceInWordsStrict } from 'date-fns';
+import classNames from 'classnames';
 
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -16,10 +17,15 @@ import { makeStyles } from '@material-ui/core/styles';
 import IconsSpriteSheet1 from '../../images/icons-spritesheet.png';
 import IconsSpriteSheet2 from '../../images/icons-spritesheet2.png';
 
-import { likeAction, getLikesAction } from '../../redux/actions/api';
+import {
+  likeAction,
+  getLikesAction,
+  followAction
+} from '../../redux/actions/api';
 
 import { NameCard } from './utils';
 import { SuggestionsSkeleton } from '../utils/skeleton';
+import { UnfollowDialog } from '../utils';
 import { CustomUsersListCardItem } from './Feed';
 
 const commonProps = {
@@ -104,7 +110,7 @@ const usePostStyles = makeStyles(theme => ({
 export default function Post({
   post: {
     imageUrl,
-    owner: { userName, fullName, profileImageUrl },
+    owner: { userName, id: ownerId, profileImageUrl },
     likes,
     caption,
     postedAt,
@@ -113,10 +119,12 @@ export default function Post({
   }
 }) {
   const classes = usePostStyles();
+  const [dialog, setDialog] = useState(false);
+  const [unfollowDialog, setUnfollowDialog] = useState(false);
+  const dispatch = useDispatch();
 
   const nameCardProps = {
     userName,
-    fullName,
     profileImageUrl,
     imageSize: 32
   };
@@ -143,32 +151,113 @@ export default function Post({
     </Link>
   );
 
+  const handleOptionsClick = bool => () => setDialog(bool);
+  const handleUnfollowButtonClick = () => {
+    dispatch(
+      followAction({
+        params: ownerId,
+        payload: { follow: false },
+        namespace: 'post'
+      })
+    );
+    setUnfollowDialog(false);
+  };
+  const onUnfollowButtonClick = () => {
+    setDialog(false);
+    setUnfollowDialog(true);
+  };
+
+  const optionsDialogProps = {
+    onClose: handleOptionsClick(false),
+    userName,
+    profileImageUrl,
+    onUnfollowButtonClick
+  };
+  const unfollowDialogProps = {
+    onClose: () => setUnfollowDialog(false),
+    userName,
+    profileImageUrl,
+    handleUnfollowButtonClick
+  };
+
   return (
-    <article className={classes.article}>
-      <div className={classes.nameCardWrapper}>
-        <NameCard {...nameCardProps} />
-        <div className={classes.icon} />
-      </div>
-      <div>
-        <img src={imageUrl} alt="post" className={classes.image} />
-      </div>
-      <div className={classes.container}>
-        <div className={classes.iconWrapper}>
-          <LikeButton id={id} ownerHasLiked={ownerHasLiked} />
-          <div className={classes.comments} />
-          <div className={classes.share} />
-          <div className={classes.save} />
+    <>
+      <article className={classes.article}>
+        <div className={classes.nameCardWrapper}>
+          <NameCard {...nameCardProps} />
+          <div className={classes.icon} onClick={handleOptionsClick(true)} />
         </div>
-        <DisplayLikes likes={likes} id={id} />
-        {userNameSection}
-        {captionSection}
-        {distanceSection}
-      </div>
-      <Hidden xsDown>
-        <Divider />
-        <Comment />
-      </Hidden>
-    </article>
+        <div>
+          <img src={imageUrl} alt="post" className={classes.image} />
+        </div>
+        <div className={classes.container}>
+          <div className={classes.iconWrapper}>
+            <LikeButton id={id} ownerHasLiked={ownerHasLiked} />
+            <div className={classes.comments} />
+            <div className={classes.share} />
+            <div className={classes.save} />
+          </div>
+          <DisplayLikes likes={likes} id={id} />
+          {userNameSection}
+          {captionSection}
+          {distanceSection}
+        </div>
+        <Hidden xsDown>
+          <Divider />
+          <Comment />
+        </Hidden>
+      </article>
+      {dialog && <OptionsDialog {...optionsDialogProps} />}
+      {unfollowDialog && <UnfollowDialog {...unfollowDialogProps} />}
+    </>
+  );
+}
+
+const useOptionsDialogStyles = makeStyles(theme => ({
+  dialogScrollPaper: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(auto, 496px)'
+  },
+
+  button: {
+    padding: '12px 8px'
+  },
+  buttonRed: {
+    color: theme.palette.error.main
+  }
+}));
+
+function OptionsDialog({ onClose, onUnfollowButtonClick }) {
+  const classes = useOptionsDialogStyles();
+
+  const dialogProps = {
+    open: true,
+    classes: {
+      scrollPaper: classes.dialogScrollPaper
+    },
+    onClose,
+    TransitionComponent: Zoom
+  };
+
+  return (
+    <Dialog {...dialogProps}>
+      <Button
+        className={classNames(classes.button, classes.buttonRed)}
+        onClick={onUnfollowButtonClick}
+      >
+        Unfollow
+      </Button>
+      <Divider />
+      <Button className={classes.button}>Go to post</Button>
+      <Divider />
+      <Button className={classes.button}>Share</Button>
+      <Divider />
+      <Button className={classes.button}>Copy Link</Button>
+      <Divider />
+      <Button onClick={onClose} className={classes.button}>
+        Cancel
+      </Button>
+    </Dialog>
   );
 }
 
