@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState, lazy, Suspense } from 'react';
+import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
 
 import Button from '@material-ui/core/Button';
 import Hidden from '@material-ui/core/Hidden';
@@ -16,10 +19,15 @@ import {
   followAction
 } from '../../redux/actions/api';
 
-import { SuggestionsSkeleton, AllPostsSkeleton } from '../utils/skeleton';
+import {
+  SuggestionsSkeleton,
+  AllPostsSkeleton,
+  ProfilePostsSkeleton
+} from '../utils/skeleton';
 import { generateKey, Loader, LinearLoader, UnfollowDialog } from '../utils';
 
 import LoadingPage from '../LoadingPage';
+import { Avatar } from '@material-ui/core';
 
 const Post = lazy(() => import('./Post'));
 
@@ -51,6 +59,9 @@ const useAllPostsStyles = makeStyles(theme => ({
     [theme.breakpoints.down('sm')]: {
       gridTemplateColumns: 'minmax(auto, 600px)',
       justifyContent: 'center'
+    },
+    '& .slick-slider': {
+      display: 'grid'
     }
   },
 
@@ -69,6 +80,11 @@ function AllPosts({ posts }) {
   return (
     <div className={classes.container}>
       <div>
+        <Hidden mdUp>
+          <Suspense fallback={<ProfilePostsSkeleton count={3} />}>
+            <SwipeableSuggestions />
+          </Suspense>
+        </Hidden>
         {posts.map(post => (
           <Suspense fallback={<AllPostsSkeleton count={5} />} key={post.id}>
             <Post post={post} />
@@ -87,6 +103,163 @@ function AllPosts({ posts }) {
           <SuggestionsCard side={true} />
         </div>
       </Hidden>
+    </div>
+  );
+}
+
+const border = '1px solid #e6e6e6';
+const marginBottom = 20;
+const useSwipeableSuggestionsStyles = makeStyles({
+  slide: {
+    background: '#ffffff',
+    padding: '10px 0px 20px 0px',
+    marginBottom,
+    border,
+    borderTop: 'none',
+    '& .slick-slide > div': {
+      border,
+      margin: '0px 10px',
+      padding: 20
+    }
+  },
+  typography: {
+    background: '#ffffff',
+    border,
+    borderBottom: 'none',
+    padding: '10px 0px 0px 12px'
+  },
+
+  skeleton: {
+    display: 'grid',
+    gridAutoFlow: 'column',
+    marginBottom,
+    gridGap: 16
+  }
+});
+
+function SwipeableSuggestions() {
+  const classes = useSwipeableSuggestionsStyles();
+  const dispatch = useDispatch();
+  const suggestions = useSelector(({ api }) => api.suggestions);
+
+  const data = suggestions.data;
+
+  useEffect(() => {
+    dispatch(getSuggestionsAction());
+  }, [dispatch]);
+
+  const sliderProps = {
+    className: classes.slide,
+    dots: false,
+    infinite: true,
+    speed: 1000,
+    touchThreshold: 1000,
+    variableWidth: true,
+    swipeToSlide: true,
+    arrows: false,
+    easing: 'ease-in-out'
+  };
+
+  if (!data) {
+    return (
+      <div className={classes.skeleton}>
+        <ProfilePostsSkeleton count={3} />
+      </div>
+    );
+  }
+
+  if (data.length < 1) {
+    return null;
+  }
+
+  return (
+    <>
+      <Typography
+        color="textSecondary"
+        variant="subtitle2"
+        className={classes.typography}
+      >
+        Suggestions For You
+      </Typography>
+      <Slider {...sliderProps}>
+        {data &&
+          data.map(friend => (
+            <SwipeableSuggestionsCardItem
+              key={friend.id}
+              friend={friend}
+              list={suggestions}
+            />
+          ))}
+      </Slider>
+    </>
+  );
+}
+
+const useSwipeableSuggestionsCardItemStyles = makeStyles(theme => ({
+  avatar: {
+    width: 54,
+    height: 54
+  },
+  avatarImg: {
+    userSelect: 'none'
+  },
+  typography: {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    width: '100%'
+  },
+  card: {
+    display: 'grid',
+    justifyItems: 'center',
+    width: 138,
+    [theme.breakpoints.down('xs')]: {
+      width: 116
+    }
+  }
+}));
+
+function SwipeableSuggestionsCardItem({ friend, list }) {
+  const { profileImageUrl, userName, fullName, id } = friend;
+  const classes = useSwipeableSuggestionsCardItemStyles();
+  const { button, unfollowDialogProps, dialog } = useFollowButtonState({
+    friend,
+    list
+  });
+
+  const avatarProps = {
+    src: profileImageUrl,
+    alt: 'user image',
+    classes: {
+      root: classes.avatar,
+      img: classes.avatarImg
+    }
+  };
+  const userNameProps = {
+    variant: 'subtitle2',
+    className: classes.typography,
+    align: 'center'
+  };
+  const fullNameProps = {
+    color: 'textSecondary',
+    variant: 'body2',
+    className: classes.typography,
+    align: 'center'
+  };
+
+  return (
+    <div key={id}>
+      <div className={classes.card}>
+        <Link to={`${userName}`}>
+          <Avatar {...avatarProps} />
+        </Link>
+        <Link to={`${userName}`}>
+          <Typography {...userNameProps}>{userName}</Typography>
+        </Link>
+        <Typography {...fullNameProps}>{fullName}</Typography>
+        {button}
+        {dialog && <UnfollowDialog {...unfollowDialogProps} />}
+      </div>
     </div>
   );
 }
@@ -203,30 +376,64 @@ const useCustomUsersListCardItemStyles = makeStyles({
     gridGap: 10,
     alignItems: 'center',
     padding: '8px 16px'
-  },
-
-  button: {
-    height: 30,
-    padding: '0px 16px'
   }
 });
 
 export function CustomUsersListCardItem({
-  friend: {
-    id,
+  friend,
+  list,
+  side,
+  namespace,
+  postId
+}) {
+  const { profileImageUrl, userName, fullName } = friend;
+  const classes = useCustomUsersListCardItemStyles();
+  const { button, unfollowDialogProps, dialog } = useFollowButtonState({
+    friend,
+    list,
+    side,
+    namespace,
+    postId
+  });
+
+  const nameCardProps = {
     profileImageUrl,
     userName,
-    fullName,
+    fullName
+  };
+
+  return (
+    <div className={classes.card}>
+      <NameCard {...nameCardProps} />
+      {button}
+      {dialog && <UnfollowDialog {...unfollowDialogProps} />}
+    </div>
+  );
+}
+
+const useFollowButtonStateStyles = makeStyles({
+  button: {
+    height: 30,
+    padding: '0px 16px',
+    marginTop: ({ side }) => (side ? 0 : 10)
+  }
+});
+
+function useFollowButtonState({
+  list,
+  namespace = '',
+  postId,
+  side,
+  friend: {
+    id,
+    userName,
+    profileImageUrl,
     ownerIsFollowing,
     isOwner = false,
     isFollowingOwner = false
-  },
-  list,
-  side,
-  namespace = '',
-  postId
+  }
 }) {
-  const classes = useCustomUsersListCardItemStyles();
+  const classes = useFollowButtonStateStyles({ side });
   const dispatch = useDispatch();
   const { current: key } = useRef(generateKey());
   const [loading, setLoading] = useState(false);
@@ -273,13 +480,15 @@ export function CustomUsersListCardItem({
     variant: !side ? 'contained' : 'text',
     color: 'primary',
     className: classes.button,
-    onClick: handleFollowButtonClick
+    onClick: handleFollowButtonClick,
+    fullWidth: true
   };
   const followingButtonProps = {
     disabled: loadingUnfollow,
     variant: !side ? 'outlined' : 'text',
     className: classes.button,
-    onClick: handleDialogClick(true)
+    onClick: handleDialogClick(true),
+    fullWidth: true
   };
   const unfollowDialogProps = {
     userName,
@@ -304,15 +513,9 @@ export function CustomUsersListCardItem({
     button = ownerIsFollowing ? followingButton : followButton;
   }
 
-  return (
-    <div className={classes.card}>
-      <NameCard
-        profileImageUrl={profileImageUrl}
-        userName={userName}
-        fullName={fullName}
-      />
-      {button}
-      {dialog && <UnfollowDialog {...unfollowDialogProps} />}
-    </div>
-  );
+  return {
+    button,
+    unfollowDialogProps,
+    dialog
+  };
 }

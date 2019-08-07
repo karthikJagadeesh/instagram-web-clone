@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@material-ui/core": "^4.1.1",
+    "@material-ui/core": "^4.3.1",
     "@material-ui/icons": "^4.2.0",
+    "@material-ui/lab": "^4.0.0-alpha.22",
     "classnames": "^2.2.6",
     "connected-react-router": "^6.4.0",
     "date-fns": "^1.30.1",
@@ -16,9 +17,11 @@
     "react-redux": "^7.1.0",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
+    "react-slick": "^0.24.0",
     "redux": "^4.0.1",
     "redux-logger": "^3.0.6",
-    "redux-saga": "^1.0.3"
+    "redux-saga": "^1.0.3",
+    "slick-carousel": "^1.8.1"
   },
   "scripts": {
     "start": "react-scripts start",
