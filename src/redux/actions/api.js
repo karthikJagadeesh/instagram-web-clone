@@ -10,7 +10,8 @@ import {
   FOLLOW,
   GET_ALL_POSTS,
   LIKE,
-  GET_LIKES
+  GET_LIKES,
+  DELETE_POST
 } from '../constants';
 
 export const userActions = {
@@ -93,4 +94,9 @@ export const getLikesAction = ({ params, key }) => ({
   path: `/post/${params.id}/likes`,
   key,
   params
+});
+
+export const deletePostAction = ({ params }) => ({
+  type: DELETE_POST,
+  path: `/post/${params.id}/`
 });

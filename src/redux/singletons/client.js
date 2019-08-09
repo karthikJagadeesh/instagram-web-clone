@@ -79,6 +79,15 @@ class Client {
     }
     return response;
   }
+
+  async delete(path) {
+    const response = await this.client({ method: 'DELETE', url: path });
+    const result = await response.json();
+    if (result.error) {
+      throw new InstaError(result.error);
+    }
+    return result;
+  }
 }
 
 const client = new Client();

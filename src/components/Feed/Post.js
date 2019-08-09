@@ -20,7 +20,8 @@ import IconsSpriteSheet2 from '../../images/icons-spritesheet2.png';
 import {
   likeAction,
   getLikesAction,
-  followAction
+  followAction,
+  deletePostAction
 } from '../../redux/actions/api';
 
 import { NameCard } from './utils';
@@ -121,6 +122,7 @@ export default function Post({
   const classes = usePostStyles();
   const [dialog, setDialog] = useState(false);
   const [unfollowDialog, setUnfollowDialog] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState(false);
   const dispatch = useDispatch();
 
   const nameCardProps = {
@@ -166,18 +168,36 @@ export default function Post({
     setDialog(false);
     setUnfollowDialog(true);
   };
+  const onDeleteButtonClick = () => {
+    setDialog(false);
+    setDeleteDialog(true);
+  };
+  const handleDeleteButtonClick = () => {
+    dispatch(
+      deletePostAction({
+        params: { id }
+      })
+    );
+    setDeleteDialog(false);
+  };
 
   const optionsDialogProps = {
     onClose: handleOptionsClick(false),
     userName,
     profileImageUrl,
-    onUnfollowButtonClick
+    onUnfollowButtonClick,
+    onDeleteButtonClick,
+    ownerId
   };
   const unfollowDialogProps = {
     onClose: () => setUnfollowDialog(false),
     userName,
     profileImageUrl,
     handleUnfollowButtonClick
+  };
+  const deleteDialogProps = {
+    onClose: () => setDeleteDialog(false),
+    handleDeleteButtonClick
   };
 
   return (
@@ -209,26 +229,29 @@ export default function Post({
       </article>
       {dialog && <OptionsDialog {...optionsDialogProps} />}
       {unfollowDialog && <UnfollowDialog {...unfollowDialogProps} />}
+      {deleteDialog && <DeleteDialog {...deleteDialogProps} />}
     </>
   );
 }
 
-const useOptionsDialogStyles = makeStyles(theme => ({
-  dialogScrollPaper: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(auto, 496px)'
-  },
+const dialogScrollPaper = {
+  display: 'grid',
+  gridTemplateColumns: 'minmax(auto, 496px)'
+};
+const button = {
+  padding: '12px 8px'
+};
+const useDeleteDialogStyles = makeStyles({
+  dialogScrollPaper,
+  button,
 
-  button: {
-    padding: '12px 8px'
-  },
-  buttonRed: {
-    color: theme.palette.error.main
+  wrapper: {
+    padding: 20
   }
-}));
+});
 
-function OptionsDialog({ onClose, onUnfollowButtonClick }) {
-  const classes = useOptionsDialogStyles();
+function DeleteDialog({ onClose, handleDeleteButtonClick }) {
+  const classes = useDeleteDialogStyles();
 
   const dialogProps = {
     open: true,
@@ -238,6 +261,79 @@ function OptionsDialog({ onClose, onUnfollowButtonClick }) {
     onClose,
     TransitionComponent: Zoom
   };
+
+  return (
+    <Dialog {...dialogProps}>
+      <div className={classes.wrapper}>
+        <Typography align="center" variant="h6" gutterBottom>
+          Delete Post?
+        </Typography>
+        <Typography align="center" color="textSecondary">
+          Are you sure you want to delete this post?
+        </Typography>
+      </div>
+      <Divider />
+      <Button
+        color="primary"
+        onClick={handleDeleteButtonClick}
+        className={classes.button}
+      >
+        Delete
+      </Button>
+      <Divider />
+      <Button onClick={onClose} className={classes.button}>
+        Cancel
+      </Button>
+    </Dialog>
+  );
+}
+
+const useOptionsDialogStyles = makeStyles(theme => ({
+  dialogScrollPaper,
+  button,
+
+  buttonRed: {
+    color: theme.palette.error.main
+  }
+}));
+
+function OptionsDialog({
+  onClose,
+  onUnfollowButtonClick,
+  ownerId,
+  onDeleteButtonClick
+}) {
+  const classes = useOptionsDialogStyles();
+  const userId = useSelector(state => state.api.user.id);
+  const isOwner = userId === ownerId;
+
+  const dialogProps = {
+    open: true,
+    classes: {
+      scrollPaper: classes.dialogScrollPaper
+    },
+    onClose,
+    TransitionComponent: Zoom
+  };
+
+  if (isOwner) {
+    return (
+      <Dialog {...dialogProps}>
+        <Button
+          className={classNames(classes.button, classes.buttonRed)}
+          onClick={onDeleteButtonClick}
+        >
+          Delete
+        </Button>
+        <Divider />
+        <Button className={classes.button}>Go to post</Button>
+        <Divider />
+        <Button onClick={onClose} className={classes.button}>
+          Cancel
+        </Button>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog {...dialogProps}>

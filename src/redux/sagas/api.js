@@ -35,6 +35,7 @@ import {
   FOLLOW_SUCESS_SUGGESTIONS,
   GET_ALL_POSTS,
   GET_ALL_POSTS_SUCCESS,
+  DELETE_POST,
   LIKE,
   LIKE_POST_PROGRESS,
   UNLIKE_POST_PROGRESS,
@@ -52,6 +53,7 @@ export function* apiSaga() {
 
   yield takeEvery(UPLOAD_POST, uploadPost);
   yield takeEvery(GET_PROFILE_POSTS, getProfilePosts);
+  yield takeEvery(DELETE_POST, deletePost);
 
   yield takeEvery(GET_SUGGESTIONS, getSuggestions);
 
@@ -68,6 +70,19 @@ export function* apiSaga() {
   while (true) {
     const action = yield take(likePostChannel);
     yield call(likePost, action);
+  }
+}
+
+function* deletePost({ path }) {
+  try {
+    const { message } = yield apply(client, client.delete, [path]);
+    yield put({ type: SHOW_MESSAGE, message });
+    yield put(getAllPostsAction());
+    const id = yield select(({ api }) => api.user.id);
+    yield put(userActions.get(id));
+  } catch ({ error }) {
+    console.error(error);
+    return;
   }
 }
 
@@ -149,6 +164,7 @@ function* uploadPost({ path, payload }) {
     yield put({ type: SHOW_MESSAGE, message });
     const params = yield select(({ api }) => api.user.id);
     yield put(userActions.get(params));
+    yield put(getAllPostsAction());
     return;
   } catch ({ error }) {
     console.error(error);

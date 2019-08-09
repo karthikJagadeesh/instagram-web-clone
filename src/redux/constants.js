@@ -40,6 +40,7 @@ export const UNFOLLOW = 'UNFOLLOW';
 
 export const GET_ALL_POSTS = 'GET_ALL_POSTS';
 export const GET_ALL_POSTS_SUCCESS = 'GET_ALL_POSTS_SUCCESS';
+export const DELETE_POST = 'DELETE_POST';
 
 export const LIKE = 'LIKE';
 export const LIKE_POST_PROGRESS = 'LIKE_POST_PROGRESS';
